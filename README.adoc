@@ -1,0 +1,4 @@
+# Foundry Ansible Docker Image
+
+A Docker image for running Foundry Ansible playbooks.
+
