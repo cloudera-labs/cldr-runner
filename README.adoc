@@ -1,4 +1,87 @@
-# Foundry Ansible Docker Image
+# Cloudera Labs Ansible-Runner
 
-A Docker image for running Foundry Ansible playbooks.
+Readme last updated: 2021-01-30
 
+A Container image for running Ansible Playbooks and other common tools used with Cloudera Software on various Infrastructure Platforms. +
+
+## Introduction
+
+This image attempts to resolve common dependencies for a broad range of full-service deployments of Cloudera Software, covering depdencies on infrastructure creation, platform deployment, and other configuration considerations, in the convenient package of a single large container.  +
+This is useful when your playbooks may need to use a combination of CLI, Collection, Role, Python, and other commands in order to achieve your outcomes - while it may be possible or preferential for these to be deployed separately we find a single integrated container moderately convenient for local development.  +
+It is based on the RedHat Ansible Runner, which provides a useful set of execution options including shell, direct container, and python import suitable for a variety of uses.
+
+## Versions
+Upstream container is `quay.io/ansible/ansible-runner:stable-2.10-devel`  +
+This provides Ansible as `2.10` and Python as `3.8`
+
+## Usage
+
+### Dockerfile
+The Dockerfile depends on deps-ansible.yml and deps-python.yml, and may be used directly to produce an image or for other purposes.  +
+For simplicity, you may wish to append your additional Ansible and Python deps to these files locally before building.
+
+### common.sh
+This file sets the default names and variables used such as the image tag and container name, and hosts several shared convenience functions. It is not expected to be executed directly, but to serve as a central point to configure these values.
+
+### build.sh
+Arguments: None +
+This is a convenience script to build the image locally and tag it as `cldr-ansible-runner:latest` by default. +
+The image is approx ~2GB when fully constructed, which is why we have opted not to host it prebuilt at this time.
+
+### run_project.sh
+This is a convenience script to complete the following actions:
+
+* Ensure Docker is running, and the image is available
+* Ensure the calling user's profile contains the expected mount dirs for credentials/config for the provided tooling. This allows the user to work with credentials and configs for these services in the execution environment but persistent to their host machine
+* Run a container, using the image, with the mounts attached. By default the container name will match the tag without the version, e.g. `cldr-ansible-runner`
+* Use the first argument provided as the project dir within the container as `/runner/project`, consistent with Ansible-Runner practices
+* At this point it branches; either it will execute arbitrary commands and exit if they are passed in additionally to the project_dir, or it will enter a shell by default if no other arguments are passed
+
+*Examples:*  +
+`./run_project.sh /path/to/myProject`  +
+This would launch the container with myProject mounted in /runner/project within the container, and drop the user in a container shell with all tools available along with their various host machine user profile directories mounted. +
+This is an excellent environment in which to manage your various cloud credentials without resolving dependencies on your host machine, or interactively install further dependencies, or execute playbooks, etc.
+
+`./run_project.sh /path/to/myProject ansible-runner run -p site.yml /runner -vv`  +
+This would launch ansible-runner with the full path to myProject in /runner/project within the container. It would automatically execute ansible-runner with the playbook site.yml with /runner as the working directory and verbosity at 2v's, and then return to the host shell when complete. +
+This is an excellent shortcut to scripted execution where the user has already set up various profiles.
+
+## Included Components
+
+### Cloud Service CLIs
+
+* Azure CLI
+* AWS CLI
+* GCloud CLI
+* CDP CLI
+
+### Ansible Collections
+
+* AWS Amazon/Community
+* Google Cloud
+* Azure Cloud
+* Azure Netapp
+
+### Ansible Roles
+
+* postgresql Role by geerlingguy
+* mysql Role by geerlingguy
+
+### Python Modules
+
+* Aws
+* Openstack
+* Azure
+* Google Auth (not full module set)
+* cdpy / CDPCLI
+
+## Developers
+Note that sequencing and dependency changes should be annotated in comments as to _why_ that change is considered necessary.  +
+Currently the file trades off duplication and therefore size-on-disk in order to maintain easy compatibility between components with conflicting versions. Examples of this include Azure CLI and Azure Collection requiring different Azure Python library versions, or CDP CLI tending to trail Azure on the shared but version-pinned Colorama dependency.  +
+Where conflict arises, the Ansible Collection dependencies are installed to the system python environment, and the CLIs are installed to virtualenvs using pipx.
+
+## Contributing
+
+Please create a feature branch from the current development Branch then submit a PR referencing an Issue for discussion.
+
+Please note that we require signed commits inline with Developer Certificate of Origin best-practices for Open Source Collaboration.
