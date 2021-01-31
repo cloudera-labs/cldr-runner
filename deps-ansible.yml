@@ -1,0 +1,20 @@
+---
+# Append other Ansible Collections to this list, e.g.
+#  - name: https://github.com/myuser/myrepo.git
+#    type: git
+#    version: mybranch
+collections:
+  - amazon.aws
+  - community.aws
+  - google.cloud
+  - azure.azcollection
+  - netapp.azure
+
+# Append other roles to this list.
+roles:
+  - src: geerlingguy.postgresql
+    version: 2.2.0
+
+  # geerlingguy.mysql with fix for issue #332
+  - src: https://github.com/dbeech/ansible-role-mysql
+    version: master
