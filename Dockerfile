@@ -14,6 +14,12 @@ LABEL maintainer="Cloudera Labs <cloudera-labs@cloudera.com>" \
       org.label-schema.description="Ansible-Runner image with deps for CDP and underlying infrastructure" \
       org.label-schema.schema-version="1.0"
 
+# Handle additional repo information
+RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc
+COPY deps/google-cloud-sdk.repo /etc/yum.repos.d/google-cloud-sdk.repo
+COPY deps/azure-cli.repo /etc/yum.repos.d/azure-cli.repo
+COPY deps/kubernetes.repo /etc/yum.repos.d/kubernetes.repo
+
 # Need to match the python devel ver to base image ver, currently 3.8
 RUN dnf install -y \
     python38-devel \
@@ -22,38 +28,27 @@ RUN dnf install -y \
     which \
     bash \
     gcc \
+    google-cloud-sdk \
+    azure-cli \
+    kubectl \
     && rm -rf /var/cache/dnf \
     && ln -fs /usr/bin/python3 /usr/bin/python
 
-## Install GCP CLI
-RUN curl -sSL https://sdk.cloud.google.com > /tmp/gcl && bash /tmp/gcl --install-dir=/opt --disable-prompts && rm /tmp/gcl
-
-## Install Kube Ctl
-RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl \
-    && chmod +x ./kubectl \
-    && mv ./kubectl /usr/local/bin \
-    && curl -LO https://amazon-eks.s3.us-west-2.amazonaws.com/1.16.8/2020-04-16/bin/linux/amd64/aws-iam-authenticator \
-    && chmod +x ./aws-iam-authenticator \
-    && mv ./aws-iam-authenticator /usr/local/bin
-
 ## Install Python Dependencies
-COPY deps-python.txt deps-python.txt
+COPY deps/python.txt deps-python.txt
 RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r deps-python.txt
 
 ## Setup Python Workarounds
-# Install Azure CLI in separate virtualenv due to conflicting azure library versions
-RUN pipx install azure-cli
-#CDP CLI pins some old libraries, running a separate pip stops it from blocking
 # Using cdpy to abstract the dependency
 RUN pip install git+git://github.com/cloudera-labs/cdpy@main#egg=cdpy
 
 ## Install Ansible Dependencies
-COPY deps-ansible.yml deps-ansible.yml
+COPY deps/ansible.yml deps-ansible.yml
 RUN ansible-galaxy install -r deps-ansible.yml
 
 ## Ensure gcloud and az are on global path
-ENV PATH "$PATH:/opt/google-cloud-sdk/bin:/home/runner/.local/bin"
+ENV PATH "$PATH:/home/runner/.local/bin"
 
 ## Set up the execution
 CMD ["ansible-runner", "run", "/runner"]
