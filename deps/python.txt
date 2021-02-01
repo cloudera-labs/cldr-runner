@@ -28,7 +28,4 @@ azure-mgmt-netapp
 # Google Collection requirements
 google-auth
 
-# Pipx for Azure CLI Install
-pipx
-
 ## Append your additional Python requirements here
