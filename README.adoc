@@ -26,6 +26,7 @@ This file sets the default names and variables used such as the image tag and co
 ### build.sh
 Arguments: None +
 This is a convenience script to build the image locally and tag it as `cldr-ansible-runner:latest` by default. +
+It will stop and remove any currently running instances of the named container.  +
 The image is approx ~2GB when fully constructed, which is why we have opted not to host it prebuilt at this time.
 
 ### run_project.sh
@@ -38,42 +39,25 @@ This is a convenience script to complete the following actions:
 * At this point it branches; either it will execute arbitrary commands and exit if they are passed in additionally to the project_dir, or it will enter a shell by default if no other arguments are passed
 
 *Examples:*  +
-`./run_project.sh /path/to/myProject`  +
-This would launch the container with myProject mounted in /runner/project within the container, and drop the user in a container shell with all tools available along with their various host machine user profile directories mounted. +
+`./run_project.sh /path/to/PycharmProjects`  +
+This would launch the container with PycharmProjects mounted in /runner/project within the container, and drop the user in a container shell with all tools available along with their various host machine user profile directories mounted. +
 This is an excellent environment in which to manage your various cloud credentials without resolving dependencies on your host machine, or interactively install further dependencies, or execute playbooks, etc.
 
 `./run_project.sh /path/to/myProject ansible-runner run -p site.yml /runner -vv`  +
 This would launch ansible-runner with the full path to myProject in /runner/project within the container. It would automatically execute ansible-runner with the playbook site.yml with /runner as the working directory and verbosity at 2v's, and then return to the host shell when complete. +
 This is an excellent shortcut to scripted execution where the user has already set up various profiles.
 
+### Other Considerations
+ansible.cfg is configured to set long timeouts, currently based on the longest running CDP Public Canary job at 150mins
+ansible.cfg also adds the path /runner/project/collections as a root for Ansible Collections, so if you happen to have your collections under development in this path (strongly recommended) they will be automatically discovered by the container alongside collections in the default paths.
+
+### Limitations
+We do not currently bring logs and build artifacts back to the host machine before stopping or removing the container, you should retrieve any artifacts you want to keep at the end of your session.
+
+
 ## Included Components
 
-### Cloud Service CLIs
-
-* Azure CLI
-* AWS CLI
-* GCloud CLI
-* CDP CLI
-
-### Ansible Collections
-
-* AWS Amazon/Community
-* Google Cloud
-* Azure Cloud
-* Azure Netapp
-
-### Ansible Roles
-
-* postgresql Role by geerlingguy
-* mysql Role by geerlingguy
-
-### Python Modules
-
-* Aws
-* Openstack
-* Azure
-* Google Auth (not full module set)
-* cdpy / CDPCLI
+Please see included files under ./deps
 
 ## Developers
 Note that sequencing and dependency changes should be annotated in comments as to _why_ that change is considered necessary.  +

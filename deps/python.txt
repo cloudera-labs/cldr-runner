@@ -9,6 +9,7 @@ netaddr
 
 # Json manipulation
 jsonmerge
+deepdiff>=5
 
 # AWS
 awscli>=1.18.222
@@ -23,7 +24,7 @@ openstacksdk
 -r https://raw.githubusercontent.com/ansible-collections/azure/dev/requirements-azure.txt
 
 # NetApp Collection requirements
-azure-mgmt-netapp
+azure-mgmt-netapp>=1.0.0
 
 # Google Collection requirements
 google-auth

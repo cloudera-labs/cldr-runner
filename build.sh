@@ -21,6 +21,7 @@ fi
 
 
 ensure_docker_is_running
+ensure_container_removal
 build_docker_image
 
 exit 0

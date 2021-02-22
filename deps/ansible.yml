@@ -4,6 +4,11 @@
 #    type: git
 #    version: mybranch
 collections:
+  - community.general
+  - community.postgresql
+  - community.crypto
+  - community.mysql
+  - ansible.posix
   - amazon.aws
   - community.aws
   - google.cloud
