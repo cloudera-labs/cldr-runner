@@ -40,7 +40,7 @@ RUN dnf install -y \
 
 ## Install Python Dependencies
 COPY deps/python.txt deps-python.txt
-RUN pip install --upgrade pip \
+RUN pip install --upgrade pip wheel \
     && pip install --no-cache-dir -r deps-python.txt
 
 ## Setup Python Workarounds
