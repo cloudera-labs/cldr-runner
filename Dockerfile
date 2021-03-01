@@ -1,4 +1,7 @@
-FROM quay.io/ansible/ansible-runner:stable-2.10-devel
+ARG BASE_IMAGE_URI=quay.io/ansible/ansible-runner
+ARG BASE_IMAGE_TAG=stable-2.10-devel
+
+FROM ${BASE_IMAGE_URI}:${BASE_IMAGE_TAG}
 
 ARG BUILD_DATE
 ARG IMAGE_FULL_NAME
@@ -21,6 +24,7 @@ COPY deps/azure-cli.repo /etc/yum.repos.d/azure-cli.repo
 COPY deps/kubernetes.repo /etc/yum.repos.d/kubernetes.repo
 
 # Need to match the python devel ver to base image ver, currently 3.8
+# Update readme if you change Python version!
 RUN dnf install -y \
     python38-devel \
     git \
@@ -36,7 +40,7 @@ RUN dnf install -y \
 
 ## Install Python Dependencies
 COPY deps/python.txt deps-python.txt
-RUN pip install --upgrade pip \
+RUN pip install --upgrade pip wheel \
     && pip install --no-cache-dir -r deps-python.txt
 
 ## Setup Python Workarounds
@@ -46,6 +50,11 @@ RUN pip install git+git://github.com/cloudera-labs/cdpy@main#egg=cdpy
 ## Install Ansible Dependencies
 COPY deps/ansible.yml deps-ansible.yml
 RUN ansible-galaxy install -r deps-ansible.yml
+
+# Copy in config files
+COPY env /runner/env
+COPY inventory /runner/inventory
+COPY ansible.cfg ansible.cfg
 
 ## Ensure gcloud and az are on global path
 ENV PATH "$PATH:/home/runner/.local/bin"
