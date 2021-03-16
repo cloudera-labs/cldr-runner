@@ -13,7 +13,7 @@ jobs:
         uses: docker/build-push-action@v1
         with:
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          registry: docker.pkg.github.com
-          repository: cloudera-labs/ansible-runner/cldr-ansible-runner
+          password: ${{ secrets.PKG_PAT }}
+          registry: ghcr.io
+          repository: cloudera-labs/cldr-ansible-runner
           tag_with_ref: true
