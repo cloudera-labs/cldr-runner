@@ -65,6 +65,9 @@ ARG GCLOUD
 ARG AZURE
 ARG CDPY
 
+# Set random data to ensure this never caches
+ARG CACHE_TIME=placeholder
+
 RUN if [[ -z "$KUBECTL" ]] ; then echo KUBECTL not requested ; else dnf install -y kubectl ; fi \
     && if [[ -z "$AWS" ]] ; then echo AWS not requested ; else pip install --no-cache-dir -r deps-python-aws.txt ; fi \
     && if [[ -z "$GCLOUD" ]] ; then echo GCLOUD not requested ; else dnf install -y google-cloud-sdk && pip install --no-cache-dir -r deps-python-gcp.txt ; fi \
