@@ -9,13 +9,14 @@ collections:
   - community.crypto
   - community.mysql
   - ansible.posix
+  - ansible.netcommon
   - amazon.aws
   - community.aws
   - google.cloud
   - azure.azcollection
+  #  - netapp.azure
   - name: https://github.com/ansible-collections/netapp.git#ansible_collections/netapp/azure
     type: git
-#  - netapp.azure
 
 # Append other roles to this list.
 roles:
