@@ -1,0 +1,5 @@
+# Azure Collection requirements, as distinct from Azure CLI
+-r https://raw.githubusercontent.com/ansible-collections/azure/dev/requirements-azure.txt
+
+# NetApp Collection requirements
+azure-mgmt-netapp>=1.0.0
