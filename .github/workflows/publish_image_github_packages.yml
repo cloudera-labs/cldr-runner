@@ -7,13 +7,91 @@ jobs:
     name: Push Docker image to GitHub Packages
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the repo
-        uses: actions/checkout@v2
-      - name: Push to GitHub Packages
-        uses: docker/build-push-action@v1
+      - name: Login to Github Container Registry
+        uses: docker/login-action@v1.8.0
         with:
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.PKG_PAT }}
-          registry: ghcr.io
-          repository: cloudera-labs/cldr-ansible-runner
-          tag_with_ref: true
+
+      - name: Get Date of Base Build
+        id: date
+        uses: nanzm/get-time-action@v1.1
+        with:
+          timeZone: 0
+          format: 'YYYY-MM-DD'
+
+      - name: Set Release Version from Tag
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: Push to GitHub Packages for Base Build
+        uses: docker/build-push-action@v2.3.0
+        with:
+          add_git_labels: true
+          tags: ghcr.io/cloudera-labs/cldr-ansible-runner:base-${{ env.RELEASE_VERSION }}
+          build-args: |
+            BUILD_DATE=${{ steps.date.outputs.time }}
+            CDPY=true
+
+      - name: Get Time for Full Build
+        id: fulltime
+        uses: nanzm/get-time-action@v1.1
+
+      - name: Push to GitHub Packages for Full Build
+        uses: docker/build-push-action@v2.3.0
+        with:
+          build-args: |
+            BASE_IMAGE_URI=ghcr.io/cloudera-labs/cldr-ansible-runner
+            BASE_IMAGE_TAG=base-${{ env.RELEASE_VERSION }}
+            AWS=true
+            GCLOUD=true
+            AZURE=true
+            KUBECTL=true
+            CDPY=true
+            CACHE_TIME=${{ steps.fulltime.outputs.time }}
+          tags: ghcr.io/cloudera-labs/cldr-ansible-runner:full-${{ env.RELEASE_VERSION }}
+
+      - name: Get Time for AWS Build
+        id: awstime
+        uses: nanzm/get-time-action@v1.1
+
+      - name: Push to GitHub Packages for AWS only
+        uses: docker/build-push-action@v2.3.0
+        with:
+          build-args: |
+            BASE_IMAGE_URI=ghcr.io/cloudera-labs/cldr-ansible-runner
+            BASE_IMAGE_TAG=base-${{ env.RELEASE_VERSION }}
+            AWS=true
+            CDPY=true
+            CACHE_TIME=${{ steps.awstime.outputs.time }}
+          tags: ghcr.io/cloudera-labs/cldr-ansible-runner:aws-${{ env.RELEASE_VERSION }}
+
+      - name: Get Time for GCP Build
+        id: gcptime
+        uses: nanzm/get-time-action@v1.1
+
+      - name: Push to GitHub Packages for GCP only
+        uses: docker/build-push-action@v2.3.0
+        with:
+          build-args: |
+            BASE_IMAGE_URI=ghcr.io/cloudera-labs/cldr-ansible-runner
+            BASE_IMAGE_TAG=base-${{ env.RELEASE_VERSION }}
+            GCLOUD=true
+            CDPY=true
+            CACHE_TIME=${{ steps.gcptime.outputs.time }}
+          tags: ghcr.io/cloudera-labs/cldr-ansible-runner:gcp-${{ env.RELEASE_VERSION }}
+
+      - name: Get Time for Azure Build
+        id: azuretime
+        uses: nanzm/get-time-action@v1.1
+
+      - name: Push to GitHub Packages for Azure only
+        uses: docker/build-push-action@v2.3.0
+        with:
+          build-args: |
+            BASE_IMAGE_URI=ghcr.io/cloudera-labs/cldr-ansible-runner
+            BASE_IMAGE_TAG=base-${{ env.RELEASE_VERSION }}
+            AZURE=true
+            CDPY=true
+            CACHE_TIME=${{ steps.azuretime.outputs.time }}
+          tags: ghcr.io/cloudera-labs/cldr-ansible-runner:azure-${{ env.RELEASE_VERSION }}
