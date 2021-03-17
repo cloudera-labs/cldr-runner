@@ -1,6 +1,6 @@
 # Cloudera Labs Ansible-Runner
 
-Readme last updated: 2021-01-30
+Readme last updated: 2021-03-17
 
 A Container image for running Ansible Playbooks and other common tools used with Cloudera Software on various Infrastructure Platforms. +
 

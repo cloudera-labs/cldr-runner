@@ -27,8 +27,8 @@ jobs:
       - name: Push to GitHub Packages for Base Build
         uses: docker/build-push-action@v2.3.0
         with:
-          add_git_labels: true
           tags: ghcr.io/cloudera-labs/cldr-ansible-runner:base-${{ env.RELEASE_VERSION }}
+          push: true
           build-args: |
             BUILD_DATE=${{ steps.date.outputs.time }}
             CDPY=true
@@ -40,6 +40,7 @@ jobs:
       - name: Push to GitHub Packages for Full Build
         uses: docker/build-push-action@v2.3.0
         with:
+          push: true
           build-args: |
             BASE_IMAGE_URI=ghcr.io/cloudera-labs/cldr-ansible-runner
             BASE_IMAGE_TAG=base-${{ env.RELEASE_VERSION }}
@@ -58,6 +59,7 @@ jobs:
       - name: Push to GitHub Packages for AWS only
         uses: docker/build-push-action@v2.3.0
         with:
+          push: true
           build-args: |
             BASE_IMAGE_URI=ghcr.io/cloudera-labs/cldr-ansible-runner
             BASE_IMAGE_TAG=base-${{ env.RELEASE_VERSION }}
@@ -73,6 +75,7 @@ jobs:
       - name: Push to GitHub Packages for GCP only
         uses: docker/build-push-action@v2.3.0
         with:
+          push: true
           build-args: |
             BASE_IMAGE_URI=ghcr.io/cloudera-labs/cldr-ansible-runner
             BASE_IMAGE_TAG=base-${{ env.RELEASE_VERSION }}
@@ -88,6 +91,7 @@ jobs:
       - name: Push to GitHub Packages for Azure only
         uses: docker/build-push-action@v2.3.0
         with:
+          push: true
           build-args: |
             BASE_IMAGE_URI=ghcr.io/cloudera-labs/cldr-ansible-runner
             BASE_IMAGE_TAG=base-${{ env.RELEASE_VERSION }}
