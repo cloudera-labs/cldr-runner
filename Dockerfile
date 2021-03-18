@@ -46,9 +46,9 @@ ARG CDPY
 ARG CACHE_TIME=placeholder
 
 RUN if [[ -z "$KUBECTL" ]] ; then echo KUBECTL not requested ; else dnf install -y kubectl ; fi \
-    && if [[ -z "$AWS" ]] ; then echo AWS not requested ; else pip install --no-cache-dir -r deps-python-aws.txt ; fi \
-    && if [[ -z "$GCLOUD" ]] ; then echo GCLOUD not requested ; else dnf install -y google-cloud-sdk && pip install --no-cache-dir -r deps-python-gcp.txt ; fi \
-    && if [[ -z "$AZURE" ]] ; then echo AZURE not requested ; else dnf install -y azure-cli && pip install --no-cache-dir -r deps-python-azure.txt ; fi \
+    && if [[ -z "$AWS" ]] ; then echo AWS not requested ; else pip install --no-cache-dir -r /runner/deps/python_aws.txt ; fi \
+    && if [[ -z "$GCLOUD" ]] ; then echo GCLOUD not requested ; else dnf install -y google-cloud-sdk && pip install --no-cache-dir -r /runner/deps/python_gcp.txt ; fi \
+    && if [[ -z "$AZURE" ]] ; then echo AZURE not requested ; else dnf install -y azure-cli && pip install --no-cache-dir -r /runner/deps/python_azure.txt ; fi \
     && if [[ -z "$CDPY" ]] ; then echo CDPY not requested ; else pip install git+git://github.com/cloudera-labs/cdpy@main#egg=cdpy --upgrade ; fi \
     && ln -fs /usr/bin/python3 /usr/bin/python
 
