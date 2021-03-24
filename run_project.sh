@@ -56,12 +56,12 @@ if [ ! "$(docker ps -q -f name=${CONTAINER_NAME})" ]; then
       --mount "type=bind,source=${HOME}/.kube,target=/home/runner/.kube" \
       --name "${CONTAINER_NAME}" \
       "${IMAGE_FULL_NAME}" \
-      /bin/bash
+      /usr/bin/env bash
 fi
 
 echo "Preparations complete, executing command..."
 if [ $# -eq 1 ]; then
-  docker exec -it "${CONTAINER_NAME}" sh
+  docker exec -it "${CONTAINER_NAME}" /usr/bin/env bash
 else
   docker exec -it "${CONTAINER_NAME}" "${@:2}"
 fi
