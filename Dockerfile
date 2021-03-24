@@ -29,7 +29,7 @@ RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc \
     && rm -rf /var/cache/dnf \
     && pip install -r /runner/deps/python_base.txt \
     && ansible-galaxy install -r /runner/deps/ansible.yml \
-    && sed -i 's/VERSION/${BASE_IMAGE_TAG}/g' /runner/.bashrc && mv /runner/.bashrc /home/runner/.bashrc
+    && sed -i "s/VERSION/${BASE_IMAGE_TAG}/g" /runner/.bashrc && mv /runner/.bashrc /home/runner/.bashrc
 
 ## Set up the execution
 CMD ["ansible-runner", "run", "/runner"]
