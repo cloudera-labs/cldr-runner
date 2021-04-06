@@ -5,18 +5,7 @@ FROM ${BASE_IMAGE_URI}:${BASE_IMAGE_TAG} AS base
 
 ARG BUILD_DATE
 ARG IMAGE_FULL_NAME
-
-# Metadata
-LABEL maintainer="Cloudera Labs <cloudera-labs@cloudera.com>" \
-      org.label-schema.url="https://github.com/cloudera-labs/ansible-runner/blob/main/README.adoc" \
-      org.opencontainers.image.source="https://github.com/cloudera-labs/ansible-runner" \
-      org.label-schema.build-date=${BUILD_DATE} \
-      org.label-schema.version=${IMAGE_FULL_NAME} \
-      org.label-schema.vcs-url="https://github.com/cloudera-labs/ansible-runner.git" \
-      org.label-schema.vcs-ref="https://github.com/cloudera-labs/ansible-runner" \
-      org.label-schema.docker.dockerfile="/Dockerfile" \
-      org.label-schema.description="Ansible-Runner image with deps for CDP and underlying infrastructure" \
-      org.label-schema.schema-version="1.0"
+ARG BASE_IMAGE_TAG
 
 # Copy Payload
 COPY payload /runner/
@@ -29,7 +18,24 @@ RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc \
     && rm -rf /var/cache/dnf \
     && pip install -r /runner/deps/python_base.txt \
     && ansible-galaxy install -r /runner/deps/ansible.yml \
-    && sed -i "s/VERSION/${BASE_IMAGE_TAG}/g" /runner/.bashrc && mv /runner/.bashrc /home/runner/.bashrc
+    && mkdir -p /home/runner/.ansible/log
+
+ENV CLDR_BUILD_DATE=${BUILD_DATE}
+ENV CLDR_BUILD_VER=${BASE_IMAGE_TAG}
+
+# Metadata
+LABEL maintainer="Cloudera Labs <cloudera-labs@cloudera.com>" \
+      org.label-schema.url="https://github.com/cloudera-labs/ansible-runner/blob/main/README.adoc" \
+      org.opencontainers.image.source="https://github.com/cloudera-labs/ansible-runner" \
+      org.label-schema.build-date="${CLDR_BUILD_DATE}" \
+      org.label-schema.version="${CLDR_BUILD_VER}" \
+      org.label-schema.vcs-url="https://github.com/cloudera-labs/ansible-runner.git" \
+      org.label-schema.vcs-ref="https://github.com/cloudera-labs/ansible-runner" \
+      org.label-schema.docker.dockerfile="/Dockerfile" \
+      org.label-schema.description="Ansible-Runner image with deps for CDP and underlying infrastructure" \
+      org.label-schema.schema-version="1.0"
+
+RUN sed -i "s/VERSION/${CLDR_BUILD_VER}/g" /runner/bashrc && mv /runner/bashrc /home/runner/.bashrc
 
 ## Set up the execution
 CMD ["ansible-runner", "run", "/runner"]

@@ -36,8 +36,8 @@ docker inspect --type=image "${IMAGE_FULL_NAME}" > /dev/null 2>&1 || { echo "Doc
 
 ensure_profile_mount_dirs
 
-if [ ! "$(docker ps -q -f name=${CONTAINER_NAME})" ]; then
-    if [ "$(docker ps -aq -f status=exited -f name=${CONTAINER_NAME})" ]; then
+if [ ! "$(docker ps -q -f name="${CONTAINER_NAME}")" ]; then
+    if [ "$(docker ps -aq -f status=exited -f name="${CONTAINER_NAME}")" ]; then
         # cleanup if exited
         echo "Attempting removal of exited execution container named '${CONTAINER_NAME}'"
         docker rm "${CONTAINER_NAME}" >/dev/null 2>&1 || echo "Execution container '${CONTAINER_NAME}' already removed, continuing..."

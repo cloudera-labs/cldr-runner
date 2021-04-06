@@ -1,2 +1,3 @@
 ---
 ANSIBLE_CONFIG=/runner/ansible.cfg
+ANSIBLE_LOG_PATH=/home/runner/.ansible/log/ansible-runner.log
