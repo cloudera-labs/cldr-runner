@@ -1,1 +1,1 @@
-PS1="\e[1;38;5;202mcldr VERSION \$> \e[0m"
+PS1="\e[1;38;5;202mcldr ${CLDR_BUILD_VER} \$> \e[0m"
