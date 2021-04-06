@@ -1,1 +1,0 @@
-PS1="\e[1;38;5;202mcldr VERSION \$> \e[0m"
