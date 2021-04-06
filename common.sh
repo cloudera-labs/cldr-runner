@@ -34,7 +34,7 @@ build_docker_image() {
 
 ensure_profile_mount_dirs() {
   echo "Ensuring default credential paths are available in calling using profile for mounting to execution environment"
-  for thisdir in ".aws" ".ssh" ".cdp" ".azure" ".kube" ".bob" ".config"
+  for thisdir in ".aws" ".ssh" ".cdp" ".azure" ".kube" ".config"
   do
     mkdir -p "${HOME}"/$thisdir
   done
