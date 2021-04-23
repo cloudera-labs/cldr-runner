@@ -18,7 +18,8 @@ RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc \
     && rm -rf /var/cache/dnf \
     && pip install -r /runner/deps/python_base.txt \
     && ansible-galaxy install -r /runner/deps/ansible.yml \
-    && mkdir -p /home/runner/.ansible/log
+    && mkdir -p /home/runner/.ansible/log \
+    && mv /runner/bashrc /home/runner/.bashrc
 
 ENV CLDR_BUILD_DATE=${BUILD_DATE}
 ENV CLDR_BUILD_VER=${BASE_IMAGE_TAG}
@@ -34,8 +35,6 @@ LABEL maintainer="Cloudera Labs <cloudera-labs@cloudera.com>" \
       org.label-schema.docker.dockerfile="/Dockerfile" \
       org.label-schema.description="Ansible-Runner image with deps for CDP and underlying infrastructure" \
       org.label-schema.schema-version="1.0"
-
-RUN sed -i "s/VERSION/${CLDR_BUILD_VER}/g" /runner/bashrc && mv /runner/bashrc /home/runner/.bashrc
 
 ## Set up the execution
 CMD ["ansible-runner", "run", "/runner"]
