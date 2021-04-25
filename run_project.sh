@@ -45,6 +45,7 @@ if [ ! "$(docker ps -q -f name="${CONTAINER_NAME}")" ]; then
     # create new container if not running
     echo "Creating new execution container named '${CONTAINER_NAME}'"
     docker run -itd \
+      --detach-keys="ctrl-@" \
       -v "${PROJECT_DIR}":/runner/project \
       --mount type=bind,src=/run/host-services/ssh-auth.sock,target=/run/host-services/ssh-auth.sock \
       -e SSH_AUTH_SOCK="/run/host-services/ssh-auth.sock" \
