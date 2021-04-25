@@ -14,7 +14,7 @@ COPY payload /runner/
 # Update readme if you change Python version!
 RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc \
     && cp /runner/deps/*.repo /etc/yum.repos.d/ \
-    && dnf install -y python38-devel git curl which bash gcc \
+    && dnf install -y python38-devel git curl which bash gcc terraform \
     && rm -rf /var/cache/dnf \
     && pip install -r /runner/deps/python_base.txt \
     && ansible-galaxy install -r /runner/deps/ansible.yml \

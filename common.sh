@@ -4,7 +4,7 @@
 BASE_IMAGE_URI="quay.io/ansible/ansible-runner"
 BASE_IMAGE_TAG="stable-2.10-devel"
 IMAGE_NAME=cldr-ansible-runner
-IMAGE_TAG=latest
+IMAGE_TAG=base-latest
 IMAGE_FULL_NAME=${IMAGE_NAME}:${IMAGE_TAG}
 CONTAINER_NAME=${IMAGE_NAME}
 BUILD_DATE=$(date '+%Y-%m-%d')
