@@ -4,20 +4,32 @@
 #    type: git
 #    version: mybranch
 collections:
+  # TODO - Update galaxy.yml dependencies in cloudera.cluster
   - community.general
-  - community.postgresql
   - community.crypto
   - community.mysql
   - ansible.posix
-  - ansible.netcommon
-  - amazon.aws
-  - community.aws
-  - google.cloud
-  - azure.azcollection
-  #  - netapp.azure
+  - freeipa.ansible_freeipa
+  #- community.postgresql
+  #- ansible.netcommon
+  #- amazon.aws
+  #- community.aws
+  #- google.cloud
+  #- azure.azcollection
+  #- netapp.azure
+  
+  # Bug fix
   - name: https://github.com/ansible-collections/netapp.git#ansible_collections/netapp/azure
     type: git
-
+  
+  # Defaults for Cloudera collections
+  - name: https://github.com/cloudera-labs/cloudera.cluster.git
+    type: git
+  - name: https://github.com/cloudera-labs/cloudera.cloud.git
+    type: git
+  - name: https://github.com/cloudera-labs/cloudera.exe.git
+    type: git
+    
 # Append other roles to this list.
 roles:
   - src: geerlingguy.postgresql
