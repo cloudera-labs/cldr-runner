@@ -26,12 +26,12 @@ ENV CLDR_BUILD_VER=${BASE_IMAGE_TAG}
 
 # Metadata
 LABEL maintainer="Cloudera Labs <cloudera-labs@cloudera.com>" \
-      org.label-schema.url="https://github.com/cloudera-labs/ansible-runner/blob/main/README.adoc" \
-      org.opencontainers.image.source="https://github.com/cloudera-labs/ansible-runner" \
+      org.label-schema.url="https://github.com/cloudera-labs/cldr-runner/blob/main/README.adoc" \
+      org.opencontainers.image.source="https://github.com/cloudera-labs/cldr-runner" \
       org.label-schema.build-date="${CLDR_BUILD_DATE}" \
       org.label-schema.version="${CLDR_BUILD_VER}" \
-      org.label-schema.vcs-url="https://github.com/cloudera-labs/ansible-runner.git" \
-      org.label-schema.vcs-ref="https://github.com/cloudera-labs/ansible-runner" \
+      org.label-schema.vcs-url="https://github.com/cloudera-labs/cldr-runner.git" \
+      org.label-schema.vcs-ref="https://github.com/cloudera-labs/cldr-runner" \
       org.label-schema.docker.dockerfile="/Dockerfile" \
       org.label-schema.description="Ansible-Runner image with deps for CDP and underlying infrastructure" \
       org.label-schema.schema-version="1.0"
