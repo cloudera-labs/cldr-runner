@@ -18,7 +18,7 @@ There are several switches within the Dockerfile to provide build output options
 Primarily these are to allow pruned images for working with each of the different usual Public cloud providers, or solely with CDP. The github actions builder runs on each release to produce example images you may use directly, or examine the Dockerfile to modify and build your own variant.  +
 
 Currently we provide the convenience builds: `base` `full` `aws` `azure` `gcp`  +
-They may be found on the https://github.com/orgs/cloudera-labs/packages/container/package/cldr-ansible-runner[Github Package Repository]
+They may be found on the https://github.com/orgs/cloudera-labs/packages/container/package/cldr-runner[Github Package Repository]
 
 ## Usage
 
@@ -31,7 +31,7 @@ This file sets the default names and variables used such as the image tag and co
 
 ### build.sh
 Arguments: None +
-This is a convenience script to build the image locally and tag it as `cldr-ansible-runner:latest` by default. +
+This is a convenience script to build the image locally and tag it as `cldr-runner:latest` by default. +
 It will stop and remove any currently running instances of the named container.  +
 The image is approx ~2GB when fully constructed, which is why we have opted not to host it prebuilt at this time.
 
@@ -40,7 +40,7 @@ This is a convenience script to complete the following actions:
 
 * Ensure Docker is running, and the image is available
 * Ensure the calling user's profile contains the expected mount dirs for credentials/config for the provided tooling. This allows the user to work with credentials and configs for these services in the execution environment but persistent to their host machine
-* Run a container, using the image, with the mounts attached. By default the container name will match the tag without the version, e.g. `cldr-ansible-runner`
+* Run a container, using the image, with the mounts attached. By default the container name will match the tag without the version, e.g. `cldr-runner`
 * Use the first argument provided as the project dir within the container as `/runner/project`, consistent with Ansible-Runner practices
 * At this point it branches; either it will execute arbitrary commands and exit if they are passed in additionally to the project_dir, or it will enter a shell by default if no other arguments are passed
 

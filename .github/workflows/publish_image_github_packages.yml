@@ -29,8 +29,8 @@ jobs:
         uses: docker/build-push-action@v2.3.0
         with:
           tags: |
-            ghcr.io/cloudera-labs/cldr-ansible-runner:base-${{ env.RELEASE_VERSION }}
-            ghcr.io/cloudera-labs/cldr-ansible-runner:base-latest
+            ghcr.io/cloudera-labs/cldr-runner:base-${{ env.RELEASE_VERSION }}
+            ghcr.io/cloudera-labs/cldr-runner:base-latest
           push: true
           build-args: |
             BUILD_DATE=${{ steps.date.outputs.time }}
@@ -45,7 +45,7 @@ jobs:
         with:
           push: true
           build-args: |
-            BASE_IMAGE_URI=ghcr.io/cloudera-labs/cldr-ansible-runner
+            BASE_IMAGE_URI=ghcr.io/cloudera-labs/cldr-runner
             BASE_IMAGE_TAG=base-${{ env.RELEASE_VERSION }}
             AWS=true
             GCLOUD=true
@@ -54,8 +54,8 @@ jobs:
             CDPY=true
             CACHE_TIME=${{ steps.fulltime.outputs.time }}
           tags: |
-            ghcr.io/cloudera-labs/cldr-ansible-runner:full-${{ env.RELEASE_VERSION }}
-            ghcr.io/cloudera-labs/cldr-ansible-runner:full-latest
+            ghcr.io/cloudera-labs/cldr-runner:full-${{ env.RELEASE_VERSION }}
+            ghcr.io/cloudera-labs/cldr-runner:full-latest
 
       - name: Get Time for AWS Build
         id: awstime
@@ -66,14 +66,14 @@ jobs:
         with:
           push: true
           build-args: |
-            BASE_IMAGE_URI=ghcr.io/cloudera-labs/cldr-ansible-runner
+            BASE_IMAGE_URI=ghcr.io/cloudera-labs/cldr-runner
             BASE_IMAGE_TAG=base-${{ env.RELEASE_VERSION }}
             AWS=true
             CDPY=true
             CACHE_TIME=${{ steps.awstime.outputs.time }}
           tags: |
-            ghcr.io/cloudera-labs/cldr-ansible-runner:aws-${{ env.RELEASE_VERSION }}
-            ghcr.io/cloudera-labs/cldr-ansible-runner:aws-latest
+            ghcr.io/cloudera-labs/cldr-runner:aws-${{ env.RELEASE_VERSION }}
+            ghcr.io/cloudera-labs/cldr-runner:aws-latest
 
 
       - name: Get Time for GCP Build
@@ -85,14 +85,14 @@ jobs:
         with:
           push: true
           build-args: |
-            BASE_IMAGE_URI=ghcr.io/cloudera-labs/cldr-ansible-runner
+            BASE_IMAGE_URI=ghcr.io/cloudera-labs/cldr-runner
             BASE_IMAGE_TAG=base-${{ env.RELEASE_VERSION }}
             GCLOUD=true
             CDPY=true
             CACHE_TIME=${{ steps.gcptime.outputs.time }}
           tags: |
-            ghcr.io/cloudera-labs/cldr-ansible-runner:gcp-${{ env.RELEASE_VERSION }}
-            ghcr.io/cloudera-labs/cldr-ansible-runner:gcp-latest
+            ghcr.io/cloudera-labs/cldr-runner:gcp-${{ env.RELEASE_VERSION }}
+            ghcr.io/cloudera-labs/cldr-runner:gcp-latest
 
       - name: Get Time for Azure Build
         id: azuretime
@@ -103,11 +103,11 @@ jobs:
         with:
           push: true
           build-args: |
-            BASE_IMAGE_URI=ghcr.io/cloudera-labs/cldr-ansible-runner
+            BASE_IMAGE_URI=ghcr.io/cloudera-labs/cldr-runner
             BASE_IMAGE_TAG=base-${{ env.RELEASE_VERSION }}
             AZURE=true
             CDPY=true
             CACHE_TIME=${{ steps.azuretime.outputs.time }}
           tags: |
-            ghcr.io/cloudera-labs/cldr-ansible-runner:azure-${{ env.RELEASE_VERSION }}
-            ghcr.io/cloudera-labs/cldr-ansible-runner:azure-latest
+            ghcr.io/cloudera-labs/cldr-runner:azure-${{ env.RELEASE_VERSION }}
+            ghcr.io/cloudera-labs/cldr-runner:azure-latest
