@@ -49,6 +49,14 @@ if [ ! "$(docker ps -q -f name="${CONTAINER_NAME}")" ]; then
       -v "${PROJECT_DIR}":/runner/project \
       --mount type=bind,src=/run/host-services/ssh-auth.sock,target=/run/host-services/ssh-auth.sock \
       -e SSH_AUTH_SOCK="/run/host-services/ssh-auth.sock" \
+      -e ANSIBLE_INVENTORY="inventory" \
+      -e ANSIBLE_CALLBACK_WHITELIST="ansible.posix.profile_tasks" \
+      -e ANSIBLE_GATHERING="smart" \
+      -e ANSIBLE_DEPRECATION_WARNINGS=false \
+      -e ANSIBLE_HOST_KEY_CHECKING=true \
+      -e ANSIBLE_SSH_RETRIES=10 \
+      -e ANSIBLE_COLLECTIONS_PATH="/opt/cldr-runner/collections" \
+      -e ANSIBLE_ROLES_PATH="/opt/cldr-runner/roles" \
       --mount "type=bind,source=${HOME}/.aws,target=/home/runner/.aws" \
       --mount "type=bind,source=${HOME}/.config,target=/home/runner/.config" \
       --mount "type=bind,source=${HOME}/.ssh,target=/home/runner/.ssh" \
