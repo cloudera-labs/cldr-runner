@@ -10,14 +10,19 @@ ARG BASE_IMAGE_TAG
 # Copy Payload
 COPY payload /runner/
 
-# Need to match the python devel ver to base image ver, currently 3.8
+# NOTE: Need to match the python devel ver to base image ver, currently 3.8
 # Update readme if you change Python version!
+
+# NOTE: Ansible collections and roles are installed into a non-default location
+# Downstream implementers and users are expected to include this location if
+# these built-ins are desired by setting the Ansible collections path variable
 RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc \
     && cp /runner/deps/*.repo /etc/yum.repos.d/ \
     && dnf install -y python38-devel git curl which bash gcc terraform \
     && rm -rf /var/cache/dnf \
     && pip install -r /runner/deps/python_base.txt \
-    && ansible-galaxy install -r /runner/deps/ansible.yml \
+    && ansible-galaxy role install -p /opt/cldr-runner/roles -r /runner/deps/ansible.yml \
+    && ansible-galaxy collection install -p /opt/cldr-runner/collections -r /runner/deps/ansible.yml \
     && mkdir -p /home/runner/.ansible/log \
     && mv /runner/bashrc /home/runner/.bashrc
 
