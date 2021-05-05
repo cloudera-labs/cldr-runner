@@ -9,8 +9,6 @@ collections:
   # Cloudera collections
   - name: https://github.com/cloudera-labs/cloudera.cluster.git
     type: git
-  - name: https://github.com/cloudera-labs/cloudera.cloud.git
-    type: git
   - name: https://github.com/cloudera-labs/cloudera.exe.git
     type: git
     
