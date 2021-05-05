@@ -5,14 +5,7 @@
 #    version: mybranch
 
 collections:
-  # TODO - Update galaxy.yml dependencies in cloudera.cluster
-  - community.general
-  - community.crypto
-  - community.mysql
-  - ansible.posix
-  - freeipa.ansible_freeipa
-  #- community.postgresql
-  
+
   # Cloudera collections
   - name: https://github.com/cloudera-labs/cloudera.cluster.git
     type: git
