@@ -4,7 +4,7 @@ ARG BASE_IMAGE_TAG=stable-2.10-devel
 FROM ${BASE_IMAGE_URI}:${BASE_IMAGE_TAG} AS base
 
 ARG BUILD_DATE
-ARG IMAGE_FULL_NAME
+ARG BUILD_TAG
 ARG BASE_IMAGE_TAG
 
 # Copy Payload
@@ -27,7 +27,7 @@ RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc \
     && mv /runner/bashrc /home/runner/.bashrc
 
 ENV CLDR_BUILD_DATE=${BUILD_DATE}
-ENV CLDR_BUILD_VER=${BASE_IMAGE_TAG}
+ENV CLDR_BUILD_VER=${BUILD_TAG}
 
 # Metadata
 LABEL maintainer="Cloudera Labs <cloudera-labs@cloudera.com>" \
@@ -53,8 +53,18 @@ ARG GCLOUD
 ARG AZURE
 ARG CDPY
 
+# Update Build Information
+ARG BUILD_DATE
+ARG BUILD_TAG
+
 # Set random data to ensure this never caches
 ARG CACHE_TIME=placeholder
+
+ENV CLDR_BUILD_DATE=${BUILD_DATE}
+ENV CLDR_BUILD_VER=${BUILD_TAG}
+# Metadata
+LABEL org.label-schema.build-date="${CLDR_BUILD_DATE}" \
+      org.label-schema.version="${CLDR_BUILD_VER}"
 
 RUN if [[ -z "$KUBECTL" ]] ; then echo KUBECTL not requested ; else dnf install -y kubectl ; fi \
     && if [[ -z "$AWS" ]] ; then echo AWS not requested ; else pip install --no-cache-dir -r /runner/deps/python_aws.txt ; fi \
