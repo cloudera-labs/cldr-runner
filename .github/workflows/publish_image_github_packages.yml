@@ -22,7 +22,7 @@ jobs:
           format: 'YYYY-MM-DD'
 
       - name: Set Release Version from Tag
-#        run: echo "RELEASE_VERSION=v0.6.3" >> $GITHUB_ENV
+#        run: echo "RELEASE_VERSION=v1.0.3.1" >> $GITHUB_ENV
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 
       - name: Push to GitHub Packages for Base Build
@@ -34,6 +34,7 @@ jobs:
           push: true
           build-args: |
             BUILD_DATE=${{ steps.date.outputs.time }}
+            BUILD_TAG=base-${{ env.RELEASE_VERSION }}
             CDPY=true
 
       - name: Get Time for Full Build
@@ -47,6 +48,7 @@ jobs:
           build-args: |
             BASE_IMAGE_URI=ghcr.io/cloudera-labs/cldr-runner
             BASE_IMAGE_TAG=base-${{ env.RELEASE_VERSION }}
+            BUILD_TAG=full-${{ env.RELEASE_VERSION }}
             AWS=true
             GCLOUD=true
             AZURE=true
@@ -68,6 +70,7 @@ jobs:
           build-args: |
             BASE_IMAGE_URI=ghcr.io/cloudera-labs/cldr-runner
             BASE_IMAGE_TAG=base-${{ env.RELEASE_VERSION }}
+            BUILD_TAG=aws-${{ env.RELEASE_VERSION }}
             AWS=true
             CDPY=true
             CACHE_TIME=${{ steps.awstime.outputs.time }}
@@ -87,6 +90,7 @@ jobs:
           build-args: |
             BASE_IMAGE_URI=ghcr.io/cloudera-labs/cldr-runner
             BASE_IMAGE_TAG=base-${{ env.RELEASE_VERSION }}
+            BUILD_TAG=gcp-${{ env.RELEASE_VERSION }}
             GCLOUD=true
             CDPY=true
             CACHE_TIME=${{ steps.gcptime.outputs.time }}
@@ -105,6 +109,7 @@ jobs:
           build-args: |
             BASE_IMAGE_URI=ghcr.io/cloudera-labs/cldr-runner
             BASE_IMAGE_TAG=base-${{ env.RELEASE_VERSION }}
+            BUILD_TAG=azure-${{ env.RELEASE_VERSION }}
             AZURE=true
             CDPY=true
             CACHE_TIME=${{ steps.azuretime.outputs.time }}

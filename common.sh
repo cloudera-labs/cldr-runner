@@ -27,7 +27,7 @@ build_docker_image() {
     -t "${IMAGE_FULL_NAME}" \
     --build-arg BASE_IMAGE_URI=${BASE_IMAGE_URI} \
     --build-arg BASE_IMAGE_TAG=${BASE_IMAGE_TAG} \
-    --build-arg IMAGE_FULL_NAME="${IMAGE_FULL_NAME}" \
+    --build-arg BUILD_TAG="${IMAGE_TAG}" \
     --build-arg BUILD_DATE="${BUILD_DATE}" \
     .
 }
