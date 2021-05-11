@@ -56,5 +56,5 @@ retries = 10
 EOF
 
 echo "Example command: "
-echo export ANSIBLE_LOG_PATH=~/ansible.log; ansible-playbook cloudera-deploy/main.yml -e "definition_path=examples/sandbox"  --ask-pass -vv -i cloudera-deploy/examples/sandbox/inventory_static.ini
+echo 'export ANSIBLE_LOG_PATH=~/ansible.log; ansible-playbook cloudera-deploy/main.yml -e "definition_path=examples/sandbox"  --ask-pass -vv -i cloudera-deploy/examples/sandbox/inventory_static.ini'
 
