@@ -18,7 +18,7 @@ COPY payload /runner/
 # these built-ins are desired by setting the Ansible collections path variable
 RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc \
     && cp /runner/deps/*.repo /etc/yum.repos.d/ \
-    && dnf install -y python38-devel git curl which bash gcc terraform \
+    && dnf install -y python38-devel git curl which bash gcc terraform nano \
     && rm -rf /var/cache/dnf \
     && pip install -r /runner/deps/python_base.txt \
     && ansible-galaxy role install -p /opt/cldr-runner/roles -r /runner/deps/ansible.yml \
