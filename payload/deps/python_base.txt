@@ -14,7 +14,12 @@ netaddr
 jsonmerge
 deepdiff>=5
 
-# OpenStack
+# OpenStack and Kubernetes
 openstacksdk
+openshift
+
+# CDP Runtime
+apache-atlas
+apache-ranger
 
 ## Append your additional Python requirements here
