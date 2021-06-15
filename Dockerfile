@@ -21,6 +21,7 @@ RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc \
     && dnf install -y python38-devel git curl which bash gcc terraform nano \
     && rm -rf /var/cache/dnf \
     && pip install -r /runner/deps/python_base.txt \
+    && pip install -r /runner/deps/python_secondary.txt \
     && ansible-galaxy role install -p /opt/cldr-runner/roles -r /runner/deps/ansible.yml \
     && ansible-galaxy collection install -p /opt/cldr-runner/collections -r /runner/deps/ansible.yml \
     && mkdir -p /home/runner/.ansible/log \
