@@ -19,7 +19,6 @@ openstacksdk
 openshift
 
 # CDP Runtime
-apache-atlas
 apache-ranger
 
 ## Append your additional Python requirements here
