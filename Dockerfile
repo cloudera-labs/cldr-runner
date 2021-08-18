@@ -26,10 +26,10 @@ RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc \
     && ansible-galaxy collection install -p /opt/cldr-runner/collections -r /runner/deps/ansible.yml \
     && mkdir -p /home/runner/.ansible/log \
     && mv /runner/bashrc /home/runner/.bashrc \
-    && dnf clean all \
-    && rm -rf /var/cache/dnf \
+    && echo "Purging Pip cache" &&  pip cache purge || echo "No Pip cache to purge" \
+    && echo "Cleaning dnf/yum cache" && dnf clean all \
   	&& rm -rf /var/cache/yum \
-    && pip cache purge
+    && rm -rf /var/cache/dnf
 
 ENV CLDR_BUILD_DATE=${BUILD_DATE}
 ENV CLDR_BUILD_VER=${BUILD_TAG}
@@ -92,10 +92,11 @@ RUN if [[ -z "$KUBECTL" ]] ; then echo KUBECTL not requested ; else \
     && if [[ -z "$CDPY" ]] ; then echo CDPY not requested ; else \
         pip install git+git://github.com/cloudera-labs/cdpy@main#egg=cdpy --upgrade \
       ; fi \
-    && ln -fs /usr/bin/python3 /usr/bin/python \
-    && pip cache purge || True # This throws an error if there is nothing in the cache \
-    && dnf clean all \
-  	&& rm -rf /var/cache/yum
+    && echo "Symlinking 'python3' to 'python'" && ln -fs /usr/bin/python3 /usr/bin/python \
+    && echo "Purging Pip cache" &&  pip cache purge || echo "No Pip cache to purge" \
+    && echo "Cleaning dnf/yum cache" && dnf clean all \
+  	&& rm -rf /var/cache/yum \
+    && rm -rf /var/cache/dnf
 
 ## Ensure gcloud and az are on global path
 ENV PATH "$PATH:/home/runner/.local/bin"
