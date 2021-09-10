@@ -18,14 +18,18 @@ COPY payload /runner/
 # these built-ins are desired by setting the Ansible collections path variable
 RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc \
     && cp /runner/deps/*.repo /etc/yum.repos.d/ \
-    && dnf install -y python38-devel git curl which bash gcc terraform nano \
-    && rm -rf /var/cache/dnf \
+    && dnf clean expire-cache \
+    && dnf install -y python38-devel git curl which bash gcc terraform nano vim \
     && pip install -r /runner/deps/python_base.txt \
     && pip install -r /runner/deps/python_secondary.txt \
     && ansible-galaxy role install -p /opt/cldr-runner/roles -r /runner/deps/ansible.yml \
     && ansible-galaxy collection install -p /opt/cldr-runner/collections -r /runner/deps/ansible.yml \
     && mkdir -p /home/runner/.ansible/log \
-    && mv /runner/bashrc /home/runner/.bashrc
+    && mv /runner/bashrc /home/runner/.bashrc \
+    && echo "Purging Pip cache" &&  pip cache purge || echo "No Pip cache to purge" \
+    && echo "Cleaning dnf/yum cache" && dnf clean all \
+  	&& rm -rf /var/cache/yum \
+    && rm -rf /var/cache/dnf
 
 ENV CLDR_BUILD_DATE=${BUILD_DATE}
 ENV CLDR_BUILD_VER=${BUILD_TAG}
@@ -67,16 +71,32 @@ ENV CLDR_BUILD_VER=${BUILD_TAG}
 LABEL org.label-schema.build-date="${CLDR_BUILD_DATE}" \
       org.label-schema.version="${CLDR_BUILD_VER}"
 
-RUN if [[ -z "$KUBECTL" ]] ; then echo KUBECTL not requested ; else dnf install -y kubectl ; fi \
+RUN if [[ -z "$KUBECTL" ]] ; then echo KUBECTL not requested ; else \
+        dnf install -y kubectl \
+      ; fi \
     && if [[ -z "$AWS" ]] ; then echo AWS not requested ; else \
-        pip install --no-cache-dir -r /runner/deps/python_aws.txt && \
+        pip install -r /runner/deps/python_aws.txt && \
         curl -o /usr/local/bin/aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/aws-iam-authenticator && \
         chmod +x /usr/local/bin/aws-iam-authenticator \
-        ; fi \
-    && if [[ -z "$GCLOUD" ]] ; then echo GCLOUD not requested ; else dnf install -y google-cloud-sdk && pip install --no-cache-dir -r /runner/deps/python_gcp.txt ; fi \
-    && if [[ -z "$AZURE" ]] ; then echo AZURE not requested ; else dnf install -y azure-cli && pip install --no-cache-dir -r /runner/deps/python_azure.txt ; fi \
-    && if [[ -z "$CDPY" ]] ; then echo CDPY not requested ; else pip install git+git://github.com/cloudera-labs/cdpy@main#egg=cdpy --upgrade ; fi \
-    && ln -fs /usr/bin/python3 /usr/bin/python
+      ; fi \
+    && if [[ -z "$GCLOUD" ]] ; then echo GCLOUD not requested ; else \
+        dnf install -y google-cloud-sdk && \
+        pip install -r /runner/deps/python_gcp.txt \
+      ; fi \
+    && if [[ -z "$AZURE" ]] ; then echo AZURE not requested ; else \
+        dnf download azure-cli && \
+        rpm -ivh --nodeps azure-cli-*.rpm && \
+        rm -f azure-cli-*.rpm && \
+        pip install -r /runner/deps/python_azure.txt \
+      ; fi \
+    && if [[ -z "$CDPY" ]] ; then echo CDPY not requested ; else \
+        pip install git+git://github.com/cloudera-labs/cdpy@main#egg=cdpy --upgrade \
+      ; fi \
+    && echo "Symlinking 'python3' to 'python'" && ln -fs /usr/bin/python3 /usr/bin/python \
+    && echo "Purging Pip cache" &&  pip cache purge || echo "No Pip cache to purge" \
+    && echo "Cleaning dnf/yum cache" && dnf clean all \
+  	&& rm -rf /var/cache/yum \
+    && rm -rf /var/cache/dnf
 
 ## Ensure gcloud and az are on global path
 ENV PATH "$PATH:/home/runner/.local/bin"
