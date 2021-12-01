@@ -1,0 +1,212 @@
+---
+# Copyright 2021 Cloudera, Inc. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# First, create a new virtual environment
+# e.g. mkvirtualenv my_devel_env
+#
+# Then set up the bootstap:
+# export ANSIBLE_COLLECTIONS_PATH=<your development directory>
+# pip install ansible-core
+# ansible-galaxy collection install community.general
+# 
+# Then construct the development environment:
+# ansible-playbook local_development.yml
+
+- name: Set up a local venv-based development environment
+  hosts: localhost
+  connection: local
+  gather_facts: yes
+  tasks:
+    - name: Confirm development workspace location
+      ansible.builtin.assert:
+        that: lookup('env', item) | length > 0
+        fail_msg: "Define your development workspace location by setting {{ item }}."
+      loop:
+        - ANSIBLE_COLLECTIONS_PATH
+      tags: precheck
+
+    - name: Ensure credential and profile paths for SSH, CDP, and cloud providers are available
+      ansible.builtin.file:
+        path: "{{ HOME }}/{{ item }}"
+        state: directory
+        force: no
+      loop:
+        - ".ssh"
+        - ".cdp"
+        - ".aws"
+        - ".azure"
+        - ".kube"
+      vars:
+        HOME: "{{ lookup('env','HOME') }}"
+      tags: credentials
+
+    - name: Ensure availability of system commands
+      when: ansible_distribution != "MacOSX"
+      ansible.builtin.package:
+        name:
+          - pip
+          - git
+          - terraform
+          - kubectl
+          - aws-iam-authenticator
+          - google-cloud-sdk
+          - azure-cli
+        state: present
+      tags: system
+
+    - name: Ensure availability of system commands (MacOSX)
+      when: ansible_distribution == "MacOSX"
+      community.general.homebrew:
+        name:
+          - git
+          - terraform
+          - kubectl
+          - aws-iam-authenticator
+          - azure-cli
+        state: present
+      tags: system
+
+    - name: Ensure availability of Gcloud system commands (MacOSX)
+      when: ansible_distribution == "MacOSX"
+      community.general.homebrew:
+        name: google-cloud-sdk
+        state: present
+      register: __osx_gcloud
+      failed_when: not (__osx_gcloud.msg is search("already installed") or __osx_gcloud.msg is search("Update done"))
+      tags: system
+
+    - name: Set up the Python dependencies
+      ansible.builtin.pip:
+        requirements: "{{ item }}"
+        chdir: "./payload/deps"
+        state: present
+      loop:
+        - python_base.txt
+        - python_secondary.txt
+        - python_gcp.txt
+        - python_azure.txt
+      tags: python
+
+    - name: Install the CDP CLI itself
+      ansible.builtin.pip:
+        name: cdpcli-beta
+        state: present
+      tags: python
+
+    - name: Clone the Cloudera automation collections
+      ansible.builtin.git:
+        repo: "{{ item.repo }}"
+        dest: "{{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}/ansible_collections/cloudera/{{ item.collection}}"
+      loop:
+        - repo: git@github.com:cloudera-labs/cloudera.cloud.git
+          collection: cloud
+        - repo: git@github.com:cloudera-labs/cloudera.cluster.git
+          collection: cluster
+        - repo: git@github.com:cloudera-labs/cloudera.exe.git
+          collection: exe
+      register: __cldr_collections
+      tags:
+        - collections
+        - roles
+
+    - name: Parse the Cloudera automation collection dependencies
+      ansible.builtin.set_fact:
+        collection_dependencies: "{{ collection_dependencies | default({}) | combine(galaxy.dependencies) }}"
+      vars:
+        file: "{{ item }}/galaxy.yml"
+        galaxy: "{{ lookup('file', file) | from_yaml }}"
+      loop: "{{ __cldr_collections.results | map(attribute='invocation') | map(attribute='module_args') | map(attribute='dest') | list }}"
+      tags: collections
+
+    - name: Install the Cloudera automation collection dependencies
+      community.general.ansible_galaxy_install:
+        type: collection
+        name: "{{ item.key }}:{{ item.value }}"
+        force: true
+      loop: "{{ collection_dependencies | dict2items | rejectattr('key', 'match', 'git+') | list }}"
+      tags: collections
+
+    # TODO Install Netapp.Azure from Git
+    - name: Warn user about missing Netapp Azure collection
+      ansible.builtin.debug:
+        msg: |
+          ===== WARNING WARNING WARNING WARNING WARNING WARNING WARNING =====
+
+          You must install the Netapp Azure collection by hand at this time.
+          
+          ===== WARNING WARNING WARNING WARNING WARNING WARNING WARNING =====
+      tags: collection
+
+    - name: Parse the Cloudera automation standalone role dependencies
+      ansible.builtin.set_fact:
+        role_dependencies: "{{ role_dependencies | default([]) | union([file]) }}"
+      vars:
+        file: "{{ item }}/requirements.yml"
+      loop: "{{ __cldr_collections.results | map(attribute='invocation') | map(attribute='module_args') | map(attribute='dest') | list }}"
+      tags: roles
+
+    - name: Install the Cloudera automation role dependencies
+      community.general.ansible_galaxy_install:
+        type: role
+        requirements_file: "{{ item }}"
+        force: true
+      when: item is exists
+      environment:
+        ANSIBLE_ROLES_PATH: "{{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}/roles"
+      loop: "{{ role_dependencies }}"
+      tags: roles
+
+    - name: Uninstall cdpy Python library
+      ansible.builtin.pip:
+        name: cdpy
+        state: absent
+      tags: cdpy
+
+    - name: Clone the cdpy Python library project
+      ansible.builtin.git:
+        repo: "git@github.com:cloudera-labs/cdpy.git"
+        dest: "{{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}/cdpy"
+      tags: cdpy
+
+    - name: Install the local cdpy library
+      ansible.builtin.pip:
+        chdir: "{{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}/cdpy"
+        editable: yes
+        name: .
+      tags: cdpy
+
+    - name: Create the environment setup script
+      ansible.builtin.copy:
+        content: |
+          #!/bin/sh
+          export ANSIBLE_COLLECTIONS_PATH={{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}
+          export ANSIBLE_ROLES_PATH={{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}/roles
+        dest: "{{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}/setup.sh"
+        mode: 0755
+      tags: coda
+
+    - name: Print instructions
+      ansible.builtin.debug:
+        msg: |
+          To use this local development environment for Cloudera automation,
+          set the following environment variables:
+
+            export ANSIBLE_COLLECTIONS_PATH={{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}
+            export ANSIBLE_ROLES_PATH={{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}
+
+          Or use the script, {{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}/setup.sh
+
+            source {{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}/setup.sh
+      tags: coda
