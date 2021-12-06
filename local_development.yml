@@ -52,18 +52,58 @@
         HOME: "{{ lookup('env','HOME') }}"
       tags: credentials
 
+    - name: Add pacakge keys and repositories for Ubuntu
+      when: ansible_distribution == "Ubuntu"
+      block:
+
+        - name: Add package keys
+          become: yes
+          ansible.builtin.apt_key:
+            url: "{{ item }}"
+            state: present
+          loop:
+            - https://apt.releases.hashicorp.com/gpg # for terraform
+            - https://packages.cloud.google.com/apt/doc/apt-key.gpg # for kubectl & google-cloud-sdk
+            - https://packages.microsoft.com/keys/microsoft.asc # for azure-cli
+        
+        - name: Add package repositories
+          become: yes
+          ansible.builtin.apt_repository:
+            repo: "{{ item.repo }}"
+            filename: "{{ item.name }}"
+            state: "present"
+          with_items:
+            - { name: "terraform", repo: "deb [arch=amd64] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main" }
+            - { name: "kubectl", repo: "deb https://apt.kubernetes.io/ kubernetes-xenial main" }
+            - { name: "google-cloud-sdk", repo: "deb https://packages.cloud.google.com/apt cloud-sdk main" }
+            - { name: "azure-cli", repo: "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ {{ ansible_distribution_release }} main" }
+      tags: system
+
     - name: Ensure availability of system commands
       when: ansible_distribution != "MacOSX"
-      ansible.builtin.package:
-        name:
-          - pip
-          - git
-          - terraform
-          - kubectl
-          - aws-iam-authenticator
-          - google-cloud-sdk
-          - azure-cli
-        state: present
+      block:
+        - name: Install commands via package manager
+          become: yes
+          ansible.builtin.package:
+            name:
+              - pip
+              - git
+              - terraform
+              - kubectl
+              - google-cloud-sdk
+              - azure-cli
+            state: present
+        
+        # TODO: Determine if aws-iam-authenticator already exists in path and skip below if it does
+
+        - name: Install commands via download (may take some time)
+          become: yes
+          ansible.builtin.get_url:
+            url: "{{ item.download_url }}"
+            dest: "/usr/local/bin/{{ item.exe }}"
+            mode: 0555
+          with_items: 
+            - { exe: "aws-iam-authenticator", download_url: "https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/aws-iam-authenticator" }
       tags: system
 
     - name: Ensure availability of system commands (MacOSX)
