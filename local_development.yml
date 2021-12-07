@@ -81,6 +81,7 @@
 
     - name: Ensure availability of system commands
       when: ansible_distribution != "MacOSX"
+      tags: system
       block:
         - name: Install commands via package manager
           become: yes
@@ -94,17 +95,26 @@
               - azure-cli
             state: present
         
-        # TODO: Determine if aws-iam-authenticator already exists in path and skip below if it does
+        - name: Install commands via download 
+          block:
+            # Determine if the executable already exists in path
+            - name: Check if commands are already available
+              ansible.builtin.command:
+                cmd: "which {{ item.exe }}"
+              register: command_availability
+              ignore_errors: true
+              loop:
+                - { exe: "aws-iam-authenticator", download_url: "https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/aws-iam-authenticator" }
 
-        - name: Install commands via download (may take some time)
-          become: yes
-          ansible.builtin.get_url:
-            url: "{{ item.download_url }}"
-            dest: "/usr/local/bin/{{ item.exe }}"
-            mode: 0555
-          loop: 
-            - { exe: "aws-iam-authenticator", download_url: "https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/aws-iam-authenticator" }
-      tags: system
+            # If command found not to be available download and install
+            - name: Download and install any required commands (may take some time)
+              become: yes
+              ansible.builtin.get_url:
+                url: "{{ item.item.download_url }}"
+                dest: "/usr/local/bin/{{ item.item.exe }}"
+                mode: 0555
+              when: item.rc != 0
+              loop: "{{ command_availability.results }}"
 
     - name: Ensure availability of system commands (MacOSX)
       when: ansible_distribution == "MacOSX"
