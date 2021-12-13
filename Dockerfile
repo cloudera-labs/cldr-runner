@@ -1,5 +1,5 @@
 ARG BASE_IMAGE_URI=quay.io/ansible/ansible-runner
-ARG BASE_IMAGE_TAG=stable-2.10-devel
+ARG BASE_IMAGE_TAG=stable-2.10-latest
 
 FROM ${BASE_IMAGE_URI}:${BASE_IMAGE_TAG} AS base
 
@@ -19,7 +19,7 @@ COPY payload /runner/
 RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc \
     && cp /runner/deps/*.repo /etc/yum.repos.d/ \
     && dnf clean expire-cache \
-    && dnf install -y python38-devel git curl which bash gcc terraform nano vim \
+    && dnf install -y python38-devel git curl which bash gcc terraform nano vim unzip \
     && pip install -r /runner/deps/python_base.txt \
     && pip install -r /runner/deps/python_secondary.txt \
     && ansible-galaxy role install -p /opt/cldr-runner/roles -r /runner/deps/ansible.yml \
@@ -77,7 +77,11 @@ RUN if [[ -z "$KUBECTL" ]] ; then echo KUBECTL not requested ; else \
     && if [[ -z "$AWS" ]] ; then echo AWS not requested ; else \
         pip install -r /runner/deps/python_aws.txt && \
         curl -o /usr/local/bin/aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/aws-iam-authenticator && \
-        chmod +x /usr/local/bin/aws-iam-authenticator \
+        chmod +x /usr/local/bin/aws-iam-authenticator && \
+        curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip" && \
+        unzip /tmp/awscliv2.zip -d /tmp && \
+        /tmp/aws/install && \
+        rm /tmp/awscliv2.zip && rm -rf /tmp/aws \
       ; fi \
     && if [[ -z "$GCLOUD" ]] ; then echo GCLOUD not requested ; else \
         dnf install -y google-cloud-sdk && \
