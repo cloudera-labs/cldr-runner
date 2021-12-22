@@ -13,16 +13,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# First, create a new virtual environment
-# e.g. mkvirtualenv my_devel_env
+### First, create a new virtual environment (using your favorite venv app)
 #
-# Then set up the bootstap:
+# mkvirtualenv <your development directory>
+#
+### Set up the bootstrap requirements:
+#
 # export ANSIBLE_COLLECTIONS_PATH=<your development directory>
-# pip install ansible-core
+# pip install ansible-base==2.10.16
 # ansible-galaxy collection install community.general
-# 
-# Then construct the development environment:
+#
+### Make sure you are using SSH to public Github and then construct the development environment:
+#
 # ansible-playbook local_development.yml
+#
+# NOTE: For Ubuntu deployments, you will need to add the `--ask-become-pass` flag.
+#
+### Then source the `setup.sh` file for fully configure for this environment.
+#
+# source <your development directory>/setup.sh
 
 - name: Set up a local venv-based development environment
   hosts: localhost
@@ -55,7 +64,6 @@
     - name: Add pacakge keys and repositories for Ubuntu
       when: ansible_distribution == "Ubuntu"
       block:
-
         - name: Add package keys
           become: yes
           ansible.builtin.apt_key:
@@ -73,14 +81,28 @@
             filename: "{{ item.name }}"
             state: "present"
           loop:
-            - { name: "terraform", repo: "deb [arch=amd64] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main" }
-            - { name: "kubectl", repo: "deb https://apt.kubernetes.io/ kubernetes-xenial main" }
-            - { name: "google-cloud-sdk", repo: "deb https://packages.cloud.google.com/apt cloud-sdk main" }
-            - { name: "azure-cli", repo: "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ {{ ansible_distribution_release }} main" }
+            - name: "terraform"
+              repo: "deb [arch=amd64] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main"
+            - name: "kubectl"
+              repo: "deb https://apt.kubernetes.io/ kubernetes-xenial main"
+            - name: "google-cloud-sdk"
+              repo: "deb https://packages.cloud.google.com/apt cloud-sdk main"
+            - name: "azure-cli"
+              repo: "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ {{ ansible_distribution_release }} main"
       tags: system
 
     - name: Ensure availability of system commands
       when: ansible_distribution != "MacOSX"
+      ansible.builtin.package:
+        name:
+          - pip
+          - git
+          - terraform
+          - kubectl
+          - aws-iam-authenticator
+          - google-cloud-sdk
+          #- azure-cli
+        state: present
       tags: system
       block:
         - name: Install commands via package manager
@@ -104,7 +126,8 @@
               register: command_availability
               ignore_errors: true
               loop:
-                - { exe: "aws-iam-authenticator", download_url: "https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/aws-iam-authenticator" }
+                - exe: "aws-iam-authenticator"
+                  download_url: "https://amazon-eks.s3.us-west-2.amazonaws.com/1.21.2/2021-07-05/bin/linux/amd64/aws-iam-authenticator"
 
             # If command found not to be available download and install
             - name: Download and install any required commands (may take some time)
@@ -124,7 +147,7 @@
           - terraform
           - kubectl
           - aws-iam-authenticator
-          - azure-cli
+          #- azure-cli
         state: present
       tags: system
 
@@ -137,6 +160,7 @@
       failed_when: not (__osx_gcloud.msg is search("already installed") or __osx_gcloud.msg is search("Update done"))
       tags: system
 
+    # TODO Add azure-mgmt-netapp to python_azure.txt
     - name: Set up the Python dependencies
       ansible.builtin.pip:
         requirements: "{{ item }}"
@@ -145,6 +169,7 @@
       loop:
         - python_base.txt
         - python_secondary.txt
+        - python_aws.txt
         - python_gcp.txt
         - python_azure.txt
       tags: python
@@ -188,16 +213,25 @@
       loop: "{{ collection_dependencies | dict2items | rejectattr('key', 'match', 'git+') | list }}"
       tags: collections
 
-    # TODO Install Netapp.Azure from Git
-    - name: Warn user about missing Netapp Azure collection
-      ansible.builtin.debug:
-        msg: |
-          ===== WARNING WARNING WARNING WARNING WARNING WARNING WARNING =====
+    - name: Fix the azure-cli-core mismatch for ADAL-to-MSAL fiasco
+      ansible.builtin.pip:
+        name: azure-cli-core==2.30.0
+        state: present
+      tags: collections
 
-          You must install the Netapp Azure collection by hand at this time.
-          
-          ===== WARNING WARNING WARNING WARNING WARNING WARNING WARNING =====
-      tags: collection
+    # TODO Install Netapp.Azure from Git -- or --
+    # add netapp.azure to the collection deps
+    - name: Netapp Azure Python deps
+      ansible.builtin.pip:
+        name: azure-mgmt-netapp
+        state: present
+      tags: python
+
+    - name: Netapp Azure Ansible collection
+      community.general.ansible_galaxy_install:
+        type: collection
+        name: netapp.azure
+      tags: collections
 
     - name: Parse the Cloudera automation standalone role dependencies
       ansible.builtin.set_fact:
