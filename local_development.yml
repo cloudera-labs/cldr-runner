@@ -93,17 +93,6 @@
 
     - name: Ensure availability of system commands
       when: ansible_distribution != "MacOSX"
-      ansible.builtin.package:
-        name:
-          - pip
-          - git
-          - terraform
-          - kubectl
-          - aws-iam-authenticator
-          - google-cloud-sdk
-          #- azure-cli
-        state: present
-      tags: system
       block:
         - name: Install commands via package manager
           become: yes
