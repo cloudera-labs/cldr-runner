@@ -13,37 +13,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-### First, create a new virtual environment (using your favorite venv app)
-#
-# mkvirtualenv <your development directory>
-#
-### Set up the bootstrap requirements:
-#
-# export ANSIBLE_COLLECTIONS_PATH=<your development directory>
-# pip install ansible-base==2.10.16
-# ansible-galaxy collection install community.general
-#
-### Make sure you are using SSH to public Github and then construct the development environment:
-#
-# ansible-playbook local_development.yml
-#
-# NOTE: For Ubuntu deployments, you will need to add the `--ask-become-pass` flag.
-#
-### Then source the `setup.sh` file for fully configure for this environment.
-#
-# source <your development directory>/setup.sh
-
 - name: Set up a local venv-based development environment
   hosts: localhost
   connection: local
   gather_facts: yes
   tasks:
-    - name: Confirm development workspace location
+    - name: Confirm prerequisite environment variables are set
       ansible.builtin.assert:
-        that: lookup('env', item) | length > 0
-        fail_msg: "Define your development workspace location by setting {{ item }}."
+        that: lookup('env', item.variable) | length > 0
+        fail_msg: "{{ item.error_msg }}"
       loop:
-        - ANSIBLE_COLLECTIONS_PATH
+        - variable: ANSIBLE_COLLECTIONS_PATH
+          error_msg: "Define your development workspace target location by setting ANSIBLE_COLLECTIONS_PATH."
+        - variable: VIRTUAL_ENV
+          error_msg: "Activate your development virtual environment."
       tags: precheck
 
     - name: Ensure credential and profile paths for SSH, CDP, and cloud providers are available
@@ -61,7 +44,7 @@
         HOME: "{{ lookup('env','HOME') }}"
       tags: credentials
 
-    - name: Add pacakge keys and repositories for Ubuntu
+    - name: Add package keys and repositories for Ubuntu
       when: ansible_distribution == "Ubuntu"
       block:
         - name: Add package keys
@@ -220,6 +203,7 @@
       community.general.ansible_galaxy_install:
         type: collection
         name: netapp.azure
+        force: true
       tags: collections
 
     - name: Parse the Cloudera automation standalone role dependencies
@@ -264,22 +248,27 @@
       ansible.builtin.copy:
         content: |
           #!/bin/sh
+
+          # Source this file to set up the development environment
+
           export ANSIBLE_COLLECTIONS_PATH={{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}
           export ANSIBLE_ROLES_PATH={{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}/roles
-        dest: "{{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}/setup.sh"
+        dest: "{{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}/setup-ansible-env.sh"
         mode: 0755
       tags: coda
 
     - name: Print instructions
-      ansible.builtin.debug:
+      vars:
         msg: |
           To use this local development environment for Cloudera automation,
           set the following environment variables:
 
             export ANSIBLE_COLLECTIONS_PATH={{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}
-            export ANSIBLE_ROLES_PATH={{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}
+            export ANSIBLE_ROLES_PATH={{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}/roles
 
-          Or use the script, {{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}/setup.sh
+          Or source the script, {{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}/setup-ansible-env.sh
 
-            source {{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}/setup.sh
+            source {{ lookup('env', 'CLDR_DEVELOPMENT_PATH') }}/setup-cldr-devel.sh
+      ansible.builtin.debug:
+        msg: "{{ msg.split('\n') }}"
       tags: coda
