@@ -6,7 +6,7 @@ A Container image for running Ansible Playbooks and other common tools used with
 
 ## Introduction
 
-This image attempts to resolve common dependencies for a broad range of full-service deployments of Cloudera Software, covering depdencies on infrastructure creation, platform deployment, and other configuration considerations, in the convenient package of a single large container.
+This image attempts to resolve common dependencies for a broad range of full-service deployments of Cloudera Software, covering dependencies on infrastructure creation, platform deployment, and other configuration considerations, in the convenient package of a single large container.
 
 This is useful when your playbooks may need to use a combination of CLI, Collection, Role, Python, and other commands in order to achieve your outcomes - while it may be possible or preferential for these to be deployed separately we find a single integrated container moderately convenient for local development.
 
@@ -79,11 +79,13 @@ Please see included files under `./deps`.
 
 ## Local Development
 
-The `cldr-runner` project can also be used to bootstrap a local development environment on the native host environment (as opposed to a Docker image).  This option is more involved, but can avoid issues with Docker, such as mount latencies. 
+The `cldr-runner` project can also be used to bootstrap a local development environment on the native host environment (as opposed to a Docker image).  This option is more involved, but can avoid issues with Docker, such as mount latencies, and improve collection development. 
 
-The `local_environment.yml` playbook can set up a `cldr-runner`-like workspace for OSX and Ubuntu.  The playbook will clone the Cloudera collections and CDPy for local work, install the external Ansible dependencies, update the Python `venv`, and create a convenient setup script for future work.  
+The `local_environment.yml` playbook sets up a `cldr-runner`-like workspace for OSX and Ubuntu.  The playbook will clone the Cloudera collections and `cdpy` for local work, install the external Ansible dependencies, update the Python `venv`, and create a convenient setup script for future work.
 
-Development in this manner starts with sourcing the setup script, activating the virtual environment, and then switching to and running `cldr-runner`-based applications, such as `cloudera-deploy`, within their own projects. 
+NOTE: The cloned Cloudera collections and cdpy project use the `main` branches by default. Manipulating the branches, etc. is outside the scope of the `local_environment.yml` playbook.
+
+Development in this manner starts with sourcing the setup script, activating the virtual environment, and then switching to and running `cldr-runner`-based applications, such as `cloudera-deploy`, within their own projects while using the development environment's collections and tools. 
 
 You can change the execution environment by updating the Git-backed projects within the `ansible_collections` directory of the development environment or wholesale by changing the virtual environment and/or pointing to other development environments via the Ansible collection and role paths (see the setup scripts for details).
 
