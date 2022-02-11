@@ -1,5 +1,4 @@
 # AWS
-awscli>=1.18.222
 botocore
 boto>=2.5
 boto3
