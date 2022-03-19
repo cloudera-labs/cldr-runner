@@ -1,21 +1,25 @@
 # Cloudera Labs Ansible-Runner
 
-Readme last updated: 2021-03-17
+Readme last updated: 2022-02-09
 
-A Container image for running Ansible Playbooks and other common tools used with Cloudera Software on various Infrastructure Platforms. +
+A Container image for running Ansible Playbooks and other common tools used with Cloudera Software on various Infrastructure Platforms.
 
 ## Introduction
 
-This image attempts to resolve common dependencies for a broad range of full-service deployments of Cloudera Software, covering depdencies on infrastructure creation, platform deployment, and other configuration considerations, in the convenient package of a single large container.  +
-This is useful when your playbooks may need to use a combination of CLI, Collection, Role, Python, and other commands in order to achieve your outcomes - while it may be possible or preferential for these to be deployed separately we find a single integrated container moderately convenient for local development.  +
+This image attempts to resolve common dependencies for a broad range of full-service deployments of Cloudera Software, covering dependencies on infrastructure creation, platform deployment, and other configuration considerations, in the convenient package of a single large container.
+
+This is useful when your playbooks may need to use a combination of CLI, Collection, Role, Python, and other commands in order to achieve your outcomes - while it may be possible or preferential for these to be deployed separately we find a single integrated container moderately convenient for local development.
+
 It is based on the RedHat Ansible Runner, which provides a useful set of execution options including shell, direct container, and python import suitable for a variety of uses.
 
 ## Versions
-Upstream container is `quay.io/ansible/ansible-runner:stable-2.10-devel`  +
+
+Upstream container is `quay.io/ansible/ansible-runner:stable-2.10-devel`
+
 This provides Ansible as `2.10` and Python as `3.8`
 
 There are several switches within the Dockerfile to provide build output options for the user.
-Primarily these are to allow pruned images for working with each of the different usual Public cloud providers, or solely with CDP. The github actions builder runs on each release to produce example images you may use directly, or examine the Dockerfile to modify and build your own variant.  +
+Primarily these are to allow pruned images for working with each of the different usual Public cloud providers, or solely with CDP. The github actions builder runs on each release to produce example images you may use directly, or examine the Dockerfile to modify and build your own variant.
 
 Currently we provide the convenience builds: `base` `full` `aws` `azure` `gcp`  +
 They may be found on the https://github.com/orgs/cloudera-labs/packages/container/package/cldr-runner[Github Package Repository]
@@ -23,16 +27,18 @@ They may be found on the https://github.com/orgs/cloudera-labs/packages/containe
 ## Usage
 
 ### Dockerfile
-The Dockerfile depends on deps-ansible.yml and deps-python.yml, and may be used directly to produce an image or for other purposes.  +
+The Dockerfile depends on deps-ansible.yml and deps-python.yml, and may be used directly to produce an image or for other purposes. 
+
 For simplicity, you may wish to append your additional Ansible and Python deps to these files locally before building.
 
 ### common.sh
 This file sets the default names and variables used such as the image tag and container name, and hosts several shared convenience functions. It is not expected to be executed directly, but to serve as a central point to configure these values.
 
 ### build.sh
-Arguments: None +
-This is a convenience script to build the image locally and tag it as `cldr-runner:latest` by default. +
-It will stop and remove any currently running instances of the named container.  +
+
+_Arguments: None_ +
+This is a convenience script to build the image locally and tag it as `cldr-runner:latest` by default. It will stop and remove any currently running instances of the named container. 
+
 The image is approx ~2GB when fully constructed, which is why we have opted not to host it prebuilt at this time.
 
 ### run_project.sh
@@ -44,30 +50,77 @@ This is a convenience script to complete the following actions:
 * Use the first argument provided as the project dir within the container as `/runner/project`, consistent with Ansible-Runner practices
 * At this point it branches; either it will execute arbitrary commands and exit if they are passed in additionally to the project_dir, or it will enter a shell by default if no other arguments are passed
 
-*Examples:*  +
-`./run_project.sh /path/to/PycharmProjects`  +
-This would launch the container with PycharmProjects mounted in /runner/project within the container, and drop the user in a container shell with all tools available along with their various host machine user profile directories mounted. +
+#### Examples
+```bash
+./run_project.sh /path/to/PycharmProjects
+```
+This would launch the container with `PycharmProjects` mounted in `/runner/project` within the container, and drop the user in a container shell with all tools available along with their various host machine user profile directories mounted.
+
 This is an excellent environment in which to manage your various cloud credentials without resolving dependencies on your host machine, or interactively install further dependencies, or execute playbooks, etc.
 
-`./run_project.sh /path/to/myProject ansible-runner run -p site.yml /runner -vv`  +
-This would launch ansible-runner with the full path to myProject in /runner/project within the container. It would automatically execute ansible-runner with the playbook site.yml with /runner as the working directory and verbosity at 2v's, and then return to the host shell when complete. +
+```bash
+./run_project.sh /path/to/myProject ansible-runner run -p site.yml /runner -vv
+```
+This would launch `ansible-runner` with the full path to `myProject` in `/runner/project` within the container. It would automatically execute `ansible-runner` with the playbook `site.yml` with `/runner` as the working directory and verbosity at `2v` 's, and then return to the host shell when complete.
+
 This is an excellent shortcut to scripted execution where the user has already set up various profiles.
 
 ### Other Considerations
-ansible.cfg is configured to set long timeouts, currently based on the longest running CDP Public Canary job at 150mins
-ansible.cfg also adds the path /runner/project/collections as a root for Ansible Collections, so if you happen to have your collections under development in this path (strongly recommended) they will be automatically discovered by the container alongside collections in the default paths.
+
+`ansible.cfg` is configured to set long timeouts, currently based on the longest running CDP Public Canary job at 150mins.  `ansible.cfg` also adds the path `/runner/project/collections` as a root for Ansible Collections, so if you happen to have your collections under development in this path (strongly recommended) they will be automatically discovered by the container alongside collections in the default paths.
 
 ### Limitations
-We do not currently bring logs and build artifacts back to the host machine before stopping or removing the container, you should retrieve any artifacts you want to keep at the end of your session.
 
+We do not currently bring logs and build artifacts back to the host machine before stopping or removing the container, you should retrieve any artifacts you want to keep at the end of your session.
 
 ## Included Components
 
-Please see included files under ./deps
+Please see included files under `./deps`.
+
+## Local Development
+
+The `cldr-runner` project can also be used to bootstrap a local development environment on the native host environment (as opposed to a Docker image).  This option is more involved, but can avoid issues with Docker, such as mount latencies, and improve collection development. 
+
+The `local_environment.yml` playbook sets up a `cldr-runner`-like workspace for OSX and Ubuntu.  The playbook will clone the Cloudera collections and `cdpy` for local work, install the external Ansible dependencies, update the Python `venv`, and create a convenient setup script for future work.
+
+NOTE: The cloned Cloudera collections and cdpy project use the `main` branches by default. Manipulating the branches, etc. is outside the scope of the `local_environment.yml` playbook.
+
+Development in this manner starts with sourcing the setup script, activating the virtual environment, and then switching to and running `cldr-runner`-based applications, such as `cloudera-deploy`, within their own projects while using the development environment's collections and tools. 
+
+You can change the execution environment by updating the Git-backed projects within the `ansible_collections` directory of the development environment or wholesale by changing the virtual environment and/or pointing to other development environments via the Ansible collection and role paths (see the setup scripts for details).
+
+*Follow these steps to set up a local environment:*
+
+Create a new virtual environment (using your favorite `venv` app):
+```bash
+$ mkvirtualenv <your development directory>
+```
+
+Set up the bootstrap requirements:
+```bash
+$ export ANSIBLE_COLLECTIONS_PATH=<your target development directory>
+$ pip install ansible-base==2.10.16
+$ ansible-galaxy collection install community.general
+```
+
+Make sure you are able to connect to public GitHub via SSH and then construct the development environment:
+```bash
+$ ansible-playbook local_development.yml
+```
+
+NOTE: For Ubuntu deployments, you will need to add the `--ask-become-pass` flag.
+
+Source the `setup-ansible-env.sh` file to use this development environment.
+```bash
+$ source <your development directory>/setup-ansible-env.sh
+```
 
 ## Developers
-Note that sequencing and dependency changes should be annotated in comments as to _why_ that change is considered necessary.  +
-Currently the file trades off duplication and therefore size-on-disk in order to maintain easy compatibility between components with conflicting versions. Examples of this include Azure CLI and Azure Collection requiring different Azure Python library versions, or CDP CLI tending to trail Azure on the shared but version-pinned Colorama dependency.  +
+
+Note that sequencing and dependency changes should be annotated in comments as to _why_ that change is considered necessary.
+
+Currently the file trades off duplication and therefore size-on-disk in order to maintain easy compatibility between components with conflicting versions. Examples of this include Azure CLI and Azure Collection requiring different Azure Python library versions, or CDP CLI tending to trail Azure on the shared but version-pinned Colorama dependency. 
+
 Where conflict arises, the Ansible Collection dependencies are installed to the system python environment, and the CLIs are installed to virtualenvs using pipx.
 
 ## Contributing
