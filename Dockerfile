@@ -94,7 +94,7 @@ RUN if [[ -z "$KUBECTL" ]] ; then echo KUBECTL not requested ; else \
         pip install -r /runner/deps/python_azure.txt \
       ; fi \
     && if [[ -z "$CDPY" ]] ; then echo CDPY not requested ; else \
-        pip install git+git://github.com/cloudera-labs/cdpy@main#egg=cdpy --upgrade \
+        pip install git+https://github.com/cloudera-labs/cdpy@main#egg=cdpy --upgrade \
       ; fi \
     && echo "Symlinking 'python3' to 'python'" && ln -fs /usr/bin/python3 /usr/bin/python \
     && echo "Purging Pip cache" &&  pip cache purge || echo "No Pip cache to purge" \
