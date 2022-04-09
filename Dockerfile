@@ -91,7 +91,8 @@ RUN if [[ -z "$KUBECTL" ]] ; then echo KUBECTL not requested ; else \
         dnf download azure-cli && \
         rpm -ivh --nodeps azure-cli-*.rpm && \
         rm -f azure-cli-*.rpm && \
-        pip install -r /runner/deps/python_azure.txt \
+        pip install -r /runner/deps/python_azure.txt && \
+        pip install azure-cli-core==2.30.0 --upgrade \
       ; fi \
     && if [[ -z "$CDPY" ]] ; then echo CDPY not requested ; else \
         pip install git+https://github.com/cloudera-labs/cdpy@main#egg=cdpy --upgrade \
