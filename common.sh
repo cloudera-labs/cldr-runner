@@ -22,14 +22,57 @@ ensure_container_removal() {
 build_docker_image() {
   echo "Checking for updates to ansible-runner base image"
   docker pull ${BASE_IMAGE_URI}:${BASE_IMAGE_TAG}
-  echo "Building image and tagging as ${IMAGE_FULL_NAME}"
-  docker build \
-    -t "${IMAGE_FULL_NAME}" \
-    --build-arg BASE_IMAGE_URI=${BASE_IMAGE_URI} \
-    --build-arg BASE_IMAGE_TAG=${BASE_IMAGE_TAG} \
-    --build-arg BUILD_TAG="${IMAGE_TAG}" \
-    --build-arg BUILD_DATE="${BUILD_DATE}" \
-    .
+
+  echo "Building image and tagging as ${IMAGE_NAME}:${IMAGE_TAG}"
+  BASE_EXEC=("docker" "build" "--progress=plain" "-t" "${IMAGE_NAME}:${IMAGE_TAG}")
+  BUILD_ARGS=(
+    "CACHE_TIME=$(date +%s)"
+    "BASE_IMAGE_URI=${BASE_IMAGE_URI}"
+    "BASE_IMAGE_TAG=${BASE_IMAGE_TAG}"
+    "BUILD_TAG=${IMAGE_TAG}"
+    "BUILD_DATE=${BUILD_DATE}"
+    "CDPY=true"
+    "KUBECTL=true"
+  )
+
+  case "${IMAGE_TAG%-*}" in
+    full)
+      echo "Building FULL"
+      BUILD_ARGS+=(
+        "AWS=true"
+        "AZURE=true"
+        "GCLOUD=true"
+      )
+      ;;
+    aws)
+      echo "Building AWS"
+      BUILD_ARGS+=(
+        "AWS=true"
+      )
+      ;;
+    gcp)
+      echo "Building GCLOUD"
+      BUILD_ARGS+=(
+        "GCLOUD=true"
+      )
+      ;;
+    azure)
+      echo "Building AZURE"
+      BUILD_ARGS+=(
+        "AZURE=true"
+      )
+      ;;
+    *)
+      echo "Building BASE"
+      ;;
+  esac
+
+  for i in "${BUILD_ARGS[@]}"; do
+    BASE_EXEC+=("--build-arg" "$i")
+  done
+  BASE_EXEC+=(".")
+
+  "${BASE_EXEC[@]}"
 }
 
 ensure_profile_mount_dirs() {
