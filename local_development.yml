@@ -146,12 +146,6 @@
         - python_azure.txt
       tags: python
 
-    - name: Install the CDP CLI itself
-      ansible.builtin.pip:
-        name: cdpcli-beta
-        state: present
-      tags: python
-
     - name: Clone the Cloudera automation collections
       ansible.builtin.git:
         repo: "{{ item.repo }}"
@@ -189,21 +183,6 @@
       ansible.builtin.pip:
         name: azure-cli-core==2.30.0
         state: present
-      tags: collections
-
-    # TODO Install Netapp.Azure from Git -- or --
-    # add netapp.azure to the collection deps
-    - name: Netapp Azure Python deps
-      ansible.builtin.pip:
-        name: azure-mgmt-netapp
-        state: present
-      tags: python
-
-    - name: Netapp Azure Ansible collection
-      community.general.ansible_galaxy_install:
-        type: collection
-        name: netapp.azure
-        force: true
       tags: collections
 
     - name: Parse the Cloudera automation standalone role dependencies
