@@ -2,7 +2,7 @@
 wheel
 
 # CVE avoidance
-requests[security]>2.5.3
+requests[security]>=2.27.1
 urllib3>1.24.2
 cryptography>=2.3.1
 
@@ -19,6 +19,8 @@ openstacksdk
 openshift
 
 # CDP Runtime
-apache-ranger
+apache-ranger==0.0.5
+nipyapi==0.18.0
+kafka-python==2.0.2
 
 ## Append your additional Python requirements here
