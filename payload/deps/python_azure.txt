@@ -1,6 +1,6 @@
 # Azure Collection requirements, as distinct from Azure CLI
-# Pinned to az.collection==1.11.0 (set in cloudera.exe)
--r https://raw.githubusercontent.com/ansible-collections/azure/v1.11.0/requirements-azure.txt
+# Pinned to az.collection==1.13.0 (set in cloudera.exe)
+-r https://raw.githubusercontent.com/ansible-collections/azure/v1.13.0/requirements-azure.txt
 
 # NetApp Collection requirements
 # Pinned to netapp.azure==21.10.0 (set in cloudera.exe)

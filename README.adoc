@@ -1,6 +1,6 @@
 # Cloudera Labs Ansible-Runner
 
-Readme last updated: 2022-02-09
+Readme last updated: 2022-07-04
 
 A Container image for running Ansible Playbooks and other common tools used with Cloudera Software on various Infrastructure Platforms.
 
@@ -14,9 +14,9 @@ It is based on the RedHat Ansible Runner, which provides a useful set of executi
 
 ## Versions
 
-Upstream container is `quay.io/ansible/ansible-runner:stable-2.10-devel`
+Upstream container is `quay.io/ansible/ansible-runner:stable-2.12-latest`
 
-This provides Ansible as `2.10` and Python as `3.8`
+This provides Ansible as `2.12` and Python as `3.8`
 
 There are several switches within the Dockerfile to provide build output options for the user.
 Primarily these are to allow pruned images for working with each of the different usual Public cloud providers, or solely with CDP. The github actions builder runs on each release to produce example images you may use directly, or examine the Dockerfile to modify and build your own variant.

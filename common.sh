@@ -2,7 +2,7 @@
 
 # Update readme if you change versions!
 BASE_IMAGE_URI="quay.io/ansible/ansible-runner"
-BASE_IMAGE_TAG="stable-2.10-devel"
+BASE_IMAGE_TAG="stable-2.12-latest"
 IMAGE_NAME=cldr-runner
 IMAGE_TAG=base-latest
 IMAGE_FULL_NAME=${IMAGE_NAME}:${IMAGE_TAG}

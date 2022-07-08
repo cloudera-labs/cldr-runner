@@ -1,2 +1,2 @@
 # Google Collection requirements
-google-auth
+google-auth>=2.9.0

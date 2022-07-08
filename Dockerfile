@@ -1,5 +1,5 @@
 ARG BASE_IMAGE_URI=quay.io/ansible/ansible-runner
-ARG BASE_IMAGE_TAG=stable-2.10-latest
+ARG BASE_IMAGE_TAG=stable-2.12-latest
 
 FROM ${BASE_IMAGE_URI}:${BASE_IMAGE_TAG} AS base
 
@@ -76,7 +76,7 @@ RUN if [[ -z "$KUBECTL" ]] ; then echo KUBECTL not requested ; else \
       ; fi \
     && if [[ -z "$AWS" ]] ; then echo AWS not requested ; else \
         pip install -r /runner/deps/python_aws.txt && \
-        curl -o /usr/local/bin/aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/aws-iam-authenticator && \
+        curl -o /usr/local/bin/aws-iam-authenticator https://s3.us-west-2.amazonaws.com/amazon-eks/1.21.2/2021-07-05/bin/linux/amd64/aws-iam-authenticator && \
         chmod +x /usr/local/bin/aws-iam-authenticator && \
         curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip" && \
         unzip /tmp/awscliv2.zip -d /tmp && \
@@ -92,7 +92,7 @@ RUN if [[ -z "$KUBECTL" ]] ; then echo KUBECTL not requested ; else \
         rpm -ivh --nodeps azure-cli-*.rpm && \
         rm -f azure-cli-*.rpm && \
         pip install -r /runner/deps/python_azure.txt && \
-        pip install azure-cli-core==2.30.0 --upgrade \
+        pip install azure-cli-core==2.37.0 --upgrade \
       ; fi \
     && if [[ -z "$CDPY" ]] ; then echo CDPY not requested ; else \
         pip install git+https://github.com/cloudera-labs/cdpy@main#egg=cdpy --upgrade \

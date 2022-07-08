@@ -1,2 +1,2 @@
 # Packages that are less well behaved and should be installed secondarily
-apache-atlas
+apache-atlas==0.0.11

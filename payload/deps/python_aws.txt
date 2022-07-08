@@ -1,7 +1,7 @@
 # AWS collection requirements
 
 # Pinned to community.aws==3.0.1 (set in cloudera.exe)
--r https://raw.githubusercontent.com/ansible-collections/community.aws/3.0.1/requirements.txt
+-r https://raw.githubusercontent.com/ansible-collections/community.aws/4.0.0/requirements.txt
 
 # Pinned to amazon.aws==3.0.0 (set in cloudera.exe)
--r https://raw.githubusercontent.com/ansible-collections/amazon.aws/3.0.0/requirements.txt
+-r https://raw.githubusercontent.com/ansible-collections/amazon.aws/4.0.0/requirements.txt

@@ -6,6 +6,9 @@ requests[security]>=2.27.1
 urllib3>1.24.2
 cryptography>=2.3.1
 
+# https://github.com/paramiko/paramiko/issues/2038
+paramiko>=2.11.0
+
 # Ansible
 jmespath
 netaddr
@@ -20,7 +23,7 @@ openshift
 
 # CDP Runtime
 apache-ranger==0.0.5
-nipyapi==0.18.0
+nipyapi==0.19.0
 kafka-python==2.0.2
 
 ## Append your additional Python requirements here
