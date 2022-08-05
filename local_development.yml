@@ -150,6 +150,7 @@
       ansible.builtin.git:
         repo: "{{ item.repo }}"
         dest: "{{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}/ansible_collections/cloudera/{{ item.collection}}"
+        version: devel
       loop:
         - repo: git@github.com:cloudera-labs/cloudera.cloud.git
           collection: cloud
@@ -214,6 +215,7 @@
       ansible.builtin.git:
         repo: "git@github.com:cloudera-labs/cdpy.git"
         dest: "{{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}/cdpy"
+        version: devel
       tags: cdpy
 
     - name: Install the local cdpy library
