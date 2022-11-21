@@ -1,0 +1,35 @@
+---
+
+# kitchen sink
+
+version: 1
+
+build_arg_defaults:
+  EE_BASE_IMAGE: "quay.io/ansible/ansible-runner:stable-2.12-latest"
+  EE_BUILDER_IMAGE: "ghcr.io/cloudera-labs/ansible-builder:${BUILD_TAG:-latest}"
+
+#ansible_config: 'ansible.cfg'
+
+dependencies:
+  galaxy: ../payload/deps/ansible.yml
+  python: ../payload/deps/python_base.txt
+  system: bindep.txt
+
+additional_build_steps:
+  prepend: |
+    ENV CLDR_BUILD_VER=${BUILD_TAG:-latest}
+    ENV PKGMGR_OPTS="--nodocs --setopt install_weak_deps=0"
+    COPY . /tmp/src
+    RUN mv /tmp/src/bashrc /home/runner/.bashrc && \
+        mv /tmp/src/repos/*.repo /etc/yum.repos.d/ && \
+        rpm --import https://packages.microsoft.com/keys/microsoft.asc && \
+        dnf install -y terraform kubectl --nodocs --setopt install_weak_deps=0 && \
+        dnf clean all && \
+        /usr/bin/python3 -m pip install --upgrade pip && \
+        /usr/bin/python3 -m pip cache purge
+  append: |
+    RUN echo "Setting Python alternative" && alternatives --set python /usr/bin/python3 && \
+        echo "Purging Pip cache" && pip cache purge || echo "No Pip cache to purge" && \
+        echo "Cleaning dnf/yum cache" && dnf clean all -y && \
+        rm -rf /var/cache/yum && \
+        rm -rf /var/cache/dnf

@@ -1,20 +1,15 @@
 ---
-# Append other Ansible Collections to this list, e.g.
-#  - name: https://github.com/myuser/myrepo.git
-#    type: git
-#    version: mybranch
 
 collections:
+  - name: https://github.com/wmudge/cloudera.cluster.git
+    type: git
+    version: feature/builder-ex-env
+  - name: https://github.com/wmudge/cloudera.exe.git
+    type: git
+    version: feature/builder-ex-env
 
-  # Cloudera collections
-  - name: https://github.com/cloudera-labs/cloudera.cluster.git
-    type: git
-  - name: https://github.com/cloudera-labs/cloudera.exe.git
-    type: git
-    
-# Append other roles to this list.
 roles:
-  - src: geerlingguy.postgresql
+  - name: geerlingguy.postgresql
     version: 2.2.0
 
   # geerlingguy.mysql with fix for issue #332
