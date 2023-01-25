@@ -21,14 +21,18 @@ on:
         default: './full/execution-environment.yml'
         required: false
         type: string
-    
+
+env:
+  EE_CONTEXT_FOLDER: './full'
+  EE_CONFIG_FILE: './full/execution-environment.yml'
+
 jobs:
   publish:
     if: github.event.label.name == 'test' || github.event_name == 'workflow_dispatch'
     uses: ./.github/workflows/build_and_push_image.yml
     with:
-      EE_CONTEXT_FOLDER: ${{ inputs.EE_CONTEXT_FOLDER }}
-      EE_CONFIG_FILE: ${{ inputs.EE_CONFIG_FILE }}
+      EE_CONTEXT_FOLDER: ${{ inputs.EE_CONTEXT_FOLDER || env.EE_CONTEXT_FOLDER }}
+      EE_CONFIG_FILE: ${{ inputs.EE_CONFIG_FILE || env.EE_CONFIG_FILE }}
 
   # Remove/reset label if invoked by the appropriate 'labeled' event
   remove-label:
