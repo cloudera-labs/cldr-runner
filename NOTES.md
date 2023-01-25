@@ -24,19 +24,19 @@ Rebuild the `ansible-builder` image to get to the latest -- `1.2.0` -- version; 
 
 (Assumes a minimal Ansible setup with `ansible-builder` installed in the `venv`.)
 
-1. Build `cldr-runner`
+1. Build `cldr-runner` using the `full` context profile, aka the "kitchen sink."
    ```bash
    ansible-builder build \
       --prune-images \
-      --file ee-example.yml \
-      -t 'ghcr.io/cloudera-labs/cldr-runner:latest' \
-      -v 3
+      --context full \
+      --file full/execution-environment.yml \
+      -t 'ghcr.io/cloudera-labs/cldr-runner:full-latest'
    ```
 1. (Push the image to a remote registry if not using locally)
 
 # Run the playbooks
 
-This image is an [Execution Environment](https://ansible-builder.readthedocs.io/en/stable/definition/#) and can be used as the `provision-isolation` container or directly from within the container itself, such as
+These images are [Execution Environments](https://ansible-builder.readthedocs.io/en/stable/definition/#) and can be used as the `provision-isolation` container for `ansible-runner`. You can run commands directly from within the container itself, such as:
 
 ```bash
 # Run inside the container ala cloudera-deploy V1
