@@ -50,3 +50,4 @@ jobs:
         with:
           labels: |
             test
+          fail_on_error: true
