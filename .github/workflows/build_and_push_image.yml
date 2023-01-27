@@ -26,7 +26,11 @@ on:
       image-sha:
         description: 'the SHA tagged image path'
         value: ghcr.io/${{ github.repository }}:sha-${{ jobs.build-push.outputs.sha-short }}
-        
+
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build-push:
     runs-on: ubuntu-latest
