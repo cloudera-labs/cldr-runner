@@ -1,0 +1,9 @@
+# TODO Track down where these two libraries  are used
+
+# JSON manipulation
+jsonmerge
+deepdiff>=5
+
+# OpenStack and Kubernetes
+openstacksdk
+openshift

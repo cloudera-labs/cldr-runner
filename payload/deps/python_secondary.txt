@@ -1,2 +1,0 @@
-# Packages that are less well behaved and should be installed secondarily
-apache-atlas

@@ -1,0 +1,74 @@
+---
+
+# Copyright 2023 Cloudera, Inc. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Validate Pull Request
+
+on:
+  pull_request:
+    branches:
+      - 'release/**'
+      - 'devel'
+      - 'devel-pvc-base'
+    
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ee_context: ["full", "base"] # "aws", "azure", "gcp"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install ansible-builder
+        run: pip install ansible-builder==1.2.0
+    
+      - name: Copy common context assets
+        run: cp builder/common/ builder/${{ matrix.ee_context }}
+
+      - name: Create image context
+        run: |
+          ansible-builder create \
+            --context=builder/${{ matrix.ee_context }} \
+            --file=builder/${{ matrix.ee_context }}/execution-environment.yml
+          
+      - name: Upload resulting Containerfile
+        uses: actions/upload-artifact@v3
+        with:
+          name: Containerfile
+          path: builder/${{ matrix.ee_context }}/Containerfile
+      
+      - name: Build image from context
+        uses: redhat-actions/buildah-build@v2
+        with:
+          context: builder/${{ matrix.ee_context }}
+          image: ${{ github.repository }}
+          containerfiles: |
+            builder/${{ matrix.ee_context }}/Containerfile
+
+      # See https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
+      - name: Save PR number
+        env:
+          PR_NUMBER: ${{ github.event.number }}
+        run: |
+          mkdir -p ./pr
+          echo $PR_NUMBER > ./pr/pr_number
+      
+      - name: Upload the PR number
+        uses: actions/upload-artifact@v3
+        with:
+          name: pr_number
+          path: pr/

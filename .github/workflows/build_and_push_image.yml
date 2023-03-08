@@ -1,0 +1,136 @@
+---
+# See https://github.com/cloin/ee-builds
+
+name: Build and deploy Execution Environment
+
+on:
+  workflow_call:
+    inputs:
+      EE_CONTEXT_FOLDER:
+        description: 'path of the directory for the generated EE container file and supporting assets'
+        required: false
+        type: string
+      EE_CONFIG_FILE:
+        description: 'path of the EE configuration file'
+        default: execution-environment.yml
+        required: false
+        type: string
+      EE_MOUNT_FOLDER:
+        description: 'path of the build folder to mount into the ansible-builder container'
+        required: false
+        type: string
+    outputs:
+      image-paths:
+        description: 'all the constructed and pushed image paths'
+        value: ${{ jobs.build-push.outputs.registry-paths }}
+      image-sha:
+        description: 'the SHA tagged image path'
+        value: ghcr.io/${{ github.repository }}:sha-${{ jobs.build-push.outputs.sha-short }}
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    outputs:
+      sha-short: ${{ steps.sha.outputs.sha-short }}
+      registry-paths: ${{ steps.push-image.outputs.registry-paths }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install ansible-builder
+        run: pip install ansible-builder==1.2.0
+
+      - name: Construct image metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}
+          tags: |
+            type=sha
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: Construct short SHA
+        id: sha
+        run: echo "sha-short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Create image context
+        run: |
+          ansible-builder create \
+            --context=${{ inputs.EE_CONTEXT_FOLDER }} \
+            --file=${{ inputs.EE_CONFIG_FILE }}
+      
+      - name: Copy build directory to volume mount and adjust container file
+        if: ${{ inputs.EE_MOUNT_FOLDER }}
+        run: |
+          sed -i 's/_build/${{ inputs.EE_MOUNT_FOLDER }}/g' \
+            ${{ inputs.EE_CONTEXT_FOLDER }}/Containerfile
+          cp ${{ inputs.EE_CONTEXT_FOLDER }}/_build/* ${{ inputs.EE_MOUNT_FOLDER }}
+          ls -la
+          echo $(cat ${{ inputs.EE_CONTEXT_FOLDER }}/Containerfile)
+
+      - name: Build image from context folder
+        if: ${{ ! inputs.EE_MOUNT_FOLDER }}
+        uses: redhat-actions/buildah-build@v2
+        with:
+          context: ${{ inputs.EE_CONTEXT_FOLDER }}
+          image: ${{ github.repository }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          containerfiles: |
+            ${{ inputs.EE_CONTEXT_FOLDER }}/Containerfile
+
+      - name: Build image from mount folder
+        if: ${{ inputs.EE_MOUNT_FOLDER }}
+        uses: redhat-actions/buildah-build@v2
+        with:
+          context: ${{ inputs.EE_MOUNT_FOLDER }}
+          image: ${{ github.repository }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          containerfiles: |
+            ${{ inputs.EE_CONTEXT_FOLDER }}/Containerfile
+
+      - name: Push image
+        id: push-image
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          tags: ${{ steps.meta.outputs.tags }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Print summary
+        working-directory: ${{ inputs.EE_CONTEXT_FOLDER }}
+        run: |
+          echo "## :rocket: Usage" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## :rocket: Usage" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Image pushed to repository: [${{ steps.push-image.outputs.registry-path }}](https://${{ steps.push-image.outputs.registry-path }})" >> $GITHUB_STEP_SUMMARY
+          echo "> \`podman pull ${{ steps.push-image.outputs.registry-path }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "## :pushpin: Ansible info:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "`podman run ${{ steps.push-image.outputs.registry-path }} ansible --version`" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "## :pushpin: Installed collections:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "`podman run ${{ steps.push-image.outputs.registry-path }} ansible-galaxy collection list`" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "## :pushpin: Installed roles:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "`podman run ${{ steps.push-image.outputs.registry-path }} ansible-galaxy collection role`" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "## :pushpin: Containerfile:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "`cat Containerfile`" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
