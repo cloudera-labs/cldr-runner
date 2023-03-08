@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+echo "DEPRECATED! Please build using the instructions in builder/BUILDING.md"
+
 source $(cd $(dirname $0); pwd -L)/common.sh
 
 display_usage() {
