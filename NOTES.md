@@ -24,15 +24,8 @@ Rebuild the `ansible-builder` image to get to the latest -- `1.2.0` -- version; 
 
 (Assumes a minimal Ansible setup with `ansible-builder` installed in the `venv`.)
 
-1. Build `cldr-runner` using the `full` context profile, aka the "kitchen sink."
-   ```bash
-   ansible-builder build \
-      --prune-images \
-      --context full \
-      --file full/execution-environment.yml \
-      -t 'ghcr.io/cloudera-labs/cldr-runner:full-latest'
-   ```
-1. (Push the image to a remote registry if not using locally)
+1. Build `cldr-runner` using the instructions in [BUILDING](builder/BUILDING.md) document.
+1. (Optionally) Push the image to a remote registry if not using locally
 
 # Run the playbooks
 
@@ -40,5 +33,8 @@ These images are [Execution Environments](https://ansible-builder.readthedocs.io
 
 ```bash
 # Run inside the container ala cloudera-deploy V1
-podman run -it ghcr.io/cloudera-labs/cldr-runner:latest /bin/bash  
+podman run -it ghcr.io/cloudera-labs/cldr-runner:latest /bin/bash
+
+# Or locally with a specific tagged image
+podman run -it localhost/cldr-runner:base-main /bin/bash
 ```
