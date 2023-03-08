@@ -45,6 +45,9 @@ jobs:
         with:
           images: |
             ghcr.io/${{ github.repository }}
+          flavor: |
+            latest=auto
+            prefix=${{ inputs.PROFILE }}
           tags: |
             type=sha
             type=ref,event=branch
