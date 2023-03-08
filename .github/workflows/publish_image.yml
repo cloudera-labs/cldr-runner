@@ -1,53 +1,28 @@
 ---
 
-name: Publish Execution Environment
+name: Publish a single Execution Environment image
 
 on:
-  release:
-    types: [published]
-  push:
-    branches: [devel]
-  pull_request:
-    types: [labeled]
   workflow_dispatch:
     inputs:
-      EE_CONTEXT_FOLDER:
-        description: 'name of the folder where the EE is located'
-        default: './full'
+      BRANCH:
+        description: 'Upstream collections branch'
+        default: 'main'
         required: false
         type: string
-      EE_CONFIG_FILE:
-        description: 'relative path to the EE file'
-        default: './full/execution-environment.yml'
+      PROFILE:
+        description: 'Execution profile'
+        default: 'base'
         required: false
         type: string
 
 permissions:
   contents: read
   packages: write
-  pull-requests: write
 
 jobs:
-  publish-manual:
-    if: github.event_name == 'workflow_dispatch'
-    uses: ./.github/workflows/build_and_push_image.yml
+  publish:
+    uses: ./.github/workflows/build_push_image.yml
     with:
-      EE_CONTEXT_FOLDER: ${{ inputs.EE_CONTEXT_FOLDER }}
-      EE_CONFIG_FILE: ${{ inputs.EE_CONFIG_FILE }}
-
-  publish-label:
-    if: github.event.label.name == 'test'
-    uses: ./.github/workflows/build_and_push_image.yml
-    with:
-      EE_CONTEXT_FOLDER: './full'
-      EE_CONFIG_FILE: './full/execution-environment.yml'
-
-  remove-label:
-    if: github.event.label.name == 'test'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions-ecosystem/action-remove-labels@v1
-        with:
-          labels: |
-            test
-          fail_on_error: true
+      BRANCH: ${{ inputs.BRANCH }}
+      PROFILE: ${{ inputs.PROFILE }}
