@@ -41,8 +41,8 @@ jobs:
         run: |
           mkdir -p context
           cp -R builder/env builder/inventory builder/repo builder/bashrc context 
-          cp -R "builder/devel/" context
-          cp "builder/ee-${{ matrix.ee_profile }}.yml" context/execution-environment.yml
+          cp -R builder/devel/* context
+          cp builder/ee-${{ matrix.ee_profile }}.yml context/execution-environment.yml
           ls -la context
 
       - name: Create image context
