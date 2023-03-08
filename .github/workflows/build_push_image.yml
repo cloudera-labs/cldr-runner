@@ -6,12 +6,12 @@ name: Build and push Execution Environment image to Packages
 on:
   workflow_call:
     inputs:
-      BRANCH_TYPE:
+      BRANCH:
         description: 'Upstream collections branch type'
         required: true
         type: string
-      CONTEXT_TYPE:
-        description: 'Execution profile type'
+      PROFILE:
+        description: 'Execution profile'
         required: true
         type: string
     outputs:
@@ -56,29 +56,26 @@ jobs:
         id: sha
         run: echo "sha-short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
-      - name: Set up context directory
-        id: context
+      - name: Set up context
         run: |
-          mkdir -p context
-          cp -R builder/env builder/inventory builder/repo builder/bashrc context 
-          cp -R "builder/${input.BRANCH_TYPE}/"" context
-          cp "builder/ee-${input.CONTEXT_TYPE}.yml" context/execution-environment.yml
-          ls -la context
+          mkdir -p ${{ input.PROFILE }}
+          cp -R builder/${{ input.BRANCH }}/* ${{ input.PROFILE }}
+          cp builder/ee-${{ input.PROFILE }}.yml ${{ input.PROFILE }}/execution-environment.yml
+          cp -R builder/env builder/inventory builder/repo builder/bashrc ${{ input.PROFILE }}
 
-      - name: Create image context
+      - name: Create Containerfile
         run: |
-          ansible-builder create --context=context
-          ls -la context
+          ansible-builder create --context ${{ input.PROFILE }} --file ${{ input.PROFILE }}/execution-environment.yml
       
-      - name: Build image from context folder
+      - name: Build image from context
         uses: redhat-actions/buildah-build@v2
         with:
-          context: context
+          context: ${{ input.PROFILE }}
           image: ${{ github.repository }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           containerfiles: |
-            context/Containerfile
+            ${{ input.PROFILE }}/Containerfile
 
       - name: Push image
         id: push-image
