@@ -1,0 +1,82 @@
+---
+
+# Copyright 2023 Cloudera, Inc. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Validate Pull Request
+
+on:
+  pull_request:
+    branches:
+      - 'release/**'
+      - 'devel'
+      - 'devel-pvc-update'
+  workflow_dispatch:
+    
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        ee_profile: ["full", "base", "aws", "azure", "gcp"]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install ansible-builder
+        run: pip install ansible-builder==1.2.0
+    
+      - name: Set up context
+        run: |
+          mkdir -p ${{ matrix.ee_profile }}
+          cp -R builder/devel/* ${{ matrix.ee_profile }}
+          cp builder/ee-${{ matrix.ee_profile }}.yml ${{ matrix.ee_profile }}/execution-environment.yml
+          cp -R builder/env builder/inventory builder/repo builder/bashrc ${{ matrix.ee_profile }}
+
+      - name: Create Containerfile
+        run: |
+          ansible-builder create --context ${{ matrix.ee_profile }} --file ${{ matrix.ee_profile }}/execution-environment.yml
+
+      - name: Upload Containerfile
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.ee_profile }}-Containerfile
+          path: ${{ matrix.ee_profile }}/Containerfile
+      
+      - name: Build image from context
+        uses: redhat-actions/buildah-build@v2
+        with:
+          context: ${{ matrix.ee_profile }}
+          image: ${{ github.repository }}
+          containerfiles: |
+            ${{ matrix.ee_profile }}/Containerfile
+
+  record:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      # See https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
+      - name: Save PR number
+        env:
+          PR_NUMBER: ${{ github.event.number }}
+        run: |
+          mkdir -p ./pr
+          echo $PR_NUMBER > ./pr/pr_number
+      
+      - name: Upload the PR number
+        uses: actions/upload-artifact@v3
+        with:
+          name: pr_number
+          path: pr/

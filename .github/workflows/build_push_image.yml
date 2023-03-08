@@ -1,0 +1,121 @@
+---
+# See https://github.com/cloin/ee-builds
+
+name: Build and push Execution Environment image to Packages
+
+on:
+  workflow_call:
+    inputs:
+      BRANCH:
+        description: 'Upstream collections branch'
+        required: true
+        type: string
+      PROFILE:
+        description: 'Execution profile'
+        required: true
+        type: string
+    outputs:
+      image-paths:
+        description: 'all the constructed and pushed image paths'
+        value: ${{ jobs.build-push.outputs.registry-paths }}
+      image-sha:
+        description: 'the SHA tagged image path'
+        value: ghcr.io/${{ github.repository }}:sha-${{ jobs.build-push.outputs.sha-short }}
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    outputs:
+      sha-short: ${{ steps.sha.outputs.sha-short }}
+      registry-paths: ${{ steps.push-image.outputs.registry-paths }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install ansible-builder
+        run: pip install ansible-builder==1.2.0
+
+      - name: Construct image metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}
+          flavor: |
+            latest=auto
+            prefix=${{ inputs.PROFILE }}-,onlatest=true
+          tags: |
+            type=sha,prefix=${{ inputs.PROFILE }}-sha-
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: Construct short SHA
+        id: sha
+        run: echo "sha-short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Set up context
+        run: |
+          mkdir -p ${{ inputs.PROFILE }}
+          cp -R builder/${{ inputs.BRANCH }}/* ${{ inputs.PROFILE }}
+          cp builder/ee-${{ inputs.PROFILE }}.yml ${{ inputs.PROFILE }}/execution-environment.yml
+          cp -R builder/env builder/inventory builder/repo builder/bashrc ${{ inputs.PROFILE }}
+
+      - name: Create Containerfile
+        run: |
+          ansible-builder create --context ${{ inputs.PROFILE }} --file ${{ inputs.PROFILE }}/execution-environment.yml
+      
+      - name: Build image from context
+        uses: redhat-actions/buildah-build@v2
+        with:
+          context: ${{ inputs.PROFILE }}
+          image: ${{ github.repository }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          containerfiles: |
+            ${{ inputs.PROFILE }}/Containerfile
+
+      - name: Push image
+        id: push-image
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          tags: ${{ steps.meta.outputs.tags }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Print summary
+        working-directory: ${{ inputs.PROFILE }}
+        run: |
+          echo "## :rocket: Usage" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Image pushed to repository: [${{ steps.push-image.outputs.registry-path }}](https://${{ steps.push-image.outputs.registry-path }})" >> $GITHUB_STEP_SUMMARY
+          echo "> \`podman pull ${{ steps.push-image.outputs.registry-path }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "## :pushpin: Ansible info:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "`podman run ${{ steps.push-image.outputs.registry-path }} ansible --version`" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "## :pushpin: Installed Python libraries:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "`podman run ${{ steps.push-image.outputs.registry-path }} pip freeze | sort`" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "## :pushpin: Installed collections:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "`podman run ${{ steps.push-image.outputs.registry-path }} ansible-galaxy collection list`" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "## :pushpin: Installed roles:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "`podman run ${{ steps.push-image.outputs.registry-path }} ansible-galaxy role list`" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "## :pushpin: Containerfile:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "`cat Containerfile`" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
