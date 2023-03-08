@@ -36,17 +36,17 @@ jobs:
       - name: Install ansible-builder
         run: pip install ansible-builder==1.2.0
     
-      - name: Set up context directory
+      - name: Set up context
         id: context
         run: |
-          mkdir -p context
-          cp -R builder/env builder/inventory builder/repo builder/bashrc context 
-          cp -R builder/devel/* context
-          cp builder/ee-${{ matrix.ee_profile }}.yml context/execution-environment.yml
-          ls -la context
+          mkdir -p ${{ matrix.ee_profile }}
+          cp -R builder/env builder/inventory builder/repo builder/bashrc ${{ matrix.ee_profile }}
+          cp -R builder/devel/* ${{ matrix.ee_profile }}
+          cp builder/ee-${{ matrix.ee_profile }}.yml ${{ matrix.ee_profile }}/execution-environment.yml
+          ls -la ${{ matrix.ee_profile }}
 
       - name: Create image context
-        working-directory: context
+        working-directory: ${{ matrix.ee_profile }}
         run: |
           ansible-builder create
 
@@ -54,12 +54,12 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Containerfile
-          path: context/Containerfile
+          path: ${{ matrix.ee_profile }}/context/Containerfile
       
       - name: Build image from context
         uses: redhat-actions/buildah-build@v2
         with:
-          context: context
+          context: ${{ matrix.ee_profile }}
           image: ${{ github.repository }}
           containerfiles: |
             context/Containerfile
