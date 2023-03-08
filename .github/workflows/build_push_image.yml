@@ -7,7 +7,7 @@ on:
   workflow_call:
     inputs:
       BRANCH:
-        description: 'Upstream collections branch type'
+        description: 'Upstream collections branch'
         required: true
         type: string
       PROFILE:
@@ -58,24 +58,24 @@ jobs:
 
       - name: Set up context
         run: |
-          mkdir -p ${{ input.PROFILE }}
-          cp -R builder/${{ input.BRANCH }}/* ${{ input.PROFILE }}
-          cp builder/ee-${{ input.PROFILE }}.yml ${{ input.PROFILE }}/execution-environment.yml
-          cp -R builder/env builder/inventory builder/repo builder/bashrc ${{ input.PROFILE }}
+          mkdir -p ${{ inputs.PROFILE }}
+          cp -R builder/${{ inputs.BRANCH }}/* ${{ inputs.PROFILE }}
+          cp builder/ee-${{ inputs.PROFILE }}.yml ${{ inputs.PROFILE }}/execution-environment.yml
+          cp -R builder/env builder/inventory builder/repo builder/bashrc ${{ inputs.PROFILE }}
 
       - name: Create Containerfile
         run: |
-          ansible-builder create --context ${{ input.PROFILE }} --file ${{ input.PROFILE }}/execution-environment.yml
+          ansible-builder create --context ${{ inputs.PROFILE }} --file ${{ inputs.PROFILE }}/execution-environment.yml
       
       - name: Build image from context
         uses: redhat-actions/buildah-build@v2
         with:
-          context: ${{ input.PROFILE }}
+          context: ${{ inputs.PROFILE }}
           image: ${{ github.repository }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           containerfiles: |
-            ${{ input.PROFILE }}/Containerfile
+            ${{ inputs.PROFILE }}/Containerfile
 
       - name: Push image
         id: push-image
