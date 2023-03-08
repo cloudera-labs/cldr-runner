@@ -1,0 +1,28 @@
+---
+
+name: Publish a single Execution Environment image
+
+on:
+  workflow_dispatch:
+    inputs:
+      BRANCH:
+        description: 'Upstream collections branch'
+        default: 'main'
+        required: false
+        type: string
+      PROFILE:
+        description: 'Execution profile'
+        default: 'base'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    uses: ./.github/workflows/build_push_image.yml
+    with:
+      BRANCH: ${{ inputs.BRANCH }}
+      PROFILE: ${{ inputs.PROFILE }}
