@@ -58,8 +58,8 @@ jobs:
       
       - name: Build image from context
         uses: redhat-actions/buildah-build@v2
+        working-directory: ${{ matrix.ee_profile }}
         with:
-          context: ${{ matrix.ee_profile }}
           image: ${{ github.repository }}
           containerfiles: |
             context/Containerfile
