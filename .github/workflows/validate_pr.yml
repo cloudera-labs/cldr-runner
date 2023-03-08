@@ -37,7 +37,6 @@ jobs:
         run: pip install ansible-builder==1.2.0
     
       - name: Set up context
-        id: context
         run: |
           mkdir -p ${{ matrix.ee_profile }}
           cp -R builder/devel/* ${{ matrix.ee_profile }}
@@ -56,15 +55,15 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Containerfile
-          path: ${{ matrix.ee_profile }}/context/Containerfile
+          path: ${{ matrix.ee_profile }}/Containerfile
       
       - name: Build image from context
         uses: redhat-actions/buildah-build@v2
         with:
-          context: ${{ matrix.ee_profile }}/context
+          context: ${{ matrix.ee_profile }}
           image: ${{ github.repository }}
           containerfiles: |
-            ${{ matrix.ee_profile }}/context/Containerfile
+            ${{ matrix.ee_profile }}/Containerfile
 
       # See https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
       - name: Save PR number
