@@ -47,7 +47,7 @@ jobs:
             ghcr.io/${{ github.repository }}
           flavor: |
             latest=auto
-            prefix=${{ inputs.PROFILE }}
+            prefix=${{ inputs.PROFILE }}-
           tags: |
             type=sha
             type=ref,event=branch
