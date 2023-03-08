@@ -41,7 +41,7 @@ jobs:
         run: |
           mkdir -p context
           cp -R builder/env builder/inventory builder/repo builder/bashrc context 
-          cp -R "builder/devel/"" context
+          cp -R "builder/devel/" context
           cp "builder/ee-${matrix.ee_context}.yml" context/execution-environment.yml
           ls -la context
 
