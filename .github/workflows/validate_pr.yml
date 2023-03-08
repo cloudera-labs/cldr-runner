@@ -46,8 +46,9 @@ jobs:
           ls -la context
 
       - name: Create image context
+        working-directory: context
         run: |
-          ansible-builder create --context=context 
+          ansible-builder create
 
       - name: Upload resulting Containerfile
         uses: actions/upload-artifact@v3
