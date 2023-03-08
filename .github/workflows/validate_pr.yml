@@ -58,11 +58,11 @@ jobs:
       
       - name: Build image from context
         uses: redhat-actions/buildah-build@v2
-        working-directory: ${{ matrix.ee_profile }}
         with:
+          context: ${{ matrix.ee_profile }}
           image: ${{ github.repository }}
           containerfiles: |
-            context/Containerfile
+            ${{ matrix.ee_profile }}/context/Containerfile
 
       # See https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
       - name: Save PR number
