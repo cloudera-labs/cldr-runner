@@ -1,9 +1,11 @@
 #!/bin/bash
 
 display_usage() {
-  echo "
+  echo "cldr-runner/builder/builder.sh
+A tool for constructing ansible-runner based Execution Environments using ansible-builder.
+  
 Usage:
-  $(basename "$0") [main|devel] [full|aws|azure|gcp] [--help or -h]
+  $(basename "$0") [main|devel] [full|aws|azure|gcp|base] [--help or -h]
 
 Description:
   Constructs the ansible-builder context for cldr-runner.
@@ -29,7 +31,7 @@ ROOT_DIR="${0%/*}"
 if [[ "$#" == 2 ]]; then
     BRANCH_TYPE="${1}"
     CONTEXT_TYPE="${2}"
-    CONTEXT_DIR="contexts/${2}"  # base, full, aws, etc.
+    CONTEXT_DIR="contexts/${2}-${1}"  # [base|full|aws|gcp|azure]-[devel|main]
     cd "${ROOT_DIR}"
     mkdir -p "${CONTEXT_DIR}"
     cp -R env inventory repo bashrc "${CONTEXT_DIR}"
@@ -37,8 +39,9 @@ if [[ "$#" == 2 ]]; then
     cp "ee-${CONTEXT_TYPE}.yml" "${CONTEXT_DIR}/execution-environment.yml"
     echo "Context created! Please run the following to build the Execution Environment image:"
     echo ""
-    echo "  ansible-builder build -c ${ROOT_DIR}/${CONTEXT_DIR} -f ${ROOT_DIR}/${CONTEXT_DIR}/execution-environment.yml"
+    echo "  ansible-builder build -c ${ROOT_DIR}/${CONTEXT_DIR} -f ${ROOT_DIR}/${CONTEXT_DIR}/execution-environment.yml -t cldr-runner:${2}-${1} --build-arg BUILD_VER=\"${2}-${1}\" --prune-images"
     echo ""
+    echo "Add the '-v 3' flag if you wish to see verbose logging."
 else
     echo "Invalid number of arguments."
     display_usage
