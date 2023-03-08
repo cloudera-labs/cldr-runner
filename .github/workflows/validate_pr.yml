@@ -19,6 +19,7 @@ name: Validate Pull Request
 on:
   pull_request:
     branches:
+      - 'release/**'
       - 'devel'
       - 'devel-pvc-update'
   workflow_dispatch:
@@ -42,16 +43,12 @@ jobs:
           cp -R builder/devel/* ${{ matrix.ee_profile }}
           cp builder/ee-${{ matrix.ee_profile }}.yml ${{ matrix.ee_profile }}/execution-environment.yml
           cp -R builder/env builder/inventory builder/repo builder/bashrc ${{ matrix.ee_profile }}
-          ls -laR ${{ matrix.ee_profile }}
 
-      # --context ${{ matrix.ee_profile }} --file ${{ matrix.ee_profile }}/execution-environment.yml
-      - name: Create Containerfile and dependencies
-        #working-directory: ${{ matrix.ee_profile }}
+      - name: Create Containerfile
         run: |
           ansible-builder create --context ${{ matrix.ee_profile }} --file ${{ matrix.ee_profile }}/execution-environment.yml
-          ls -laR 
 
-      - name: Upload resulting Containerfile
+      - name: Upload Containerfile
         uses: actions/upload-artifact@v3
         with:
           name: Containerfile
@@ -65,6 +62,10 @@ jobs:
           containerfiles: |
             ${{ matrix.ee_profile }}/Containerfile
 
+  record:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
       # See https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
       - name: Save PR number
         env:
