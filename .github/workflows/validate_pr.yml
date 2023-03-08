@@ -19,16 +19,15 @@ name: Validate Pull Request
 on:
   pull_request:
     branches:
-      - 'release/**'
       - 'devel'
-      - 'devel-pvc-base'
+      - 'devel-pvc-update'
     
 jobs:
   validate:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ee_context: ["full", "base"] # "aws", "azure", "gcp"
+        ee_context: ["full", "base", "aws", "azure", "gcp"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -36,28 +35,32 @@ jobs:
       - name: Install ansible-builder
         run: pip install ansible-builder==1.2.0
     
-      - name: Copy common context assets
-        run: cp builder/common/ builder/${{ matrix.ee_context }}
+      - name: Set up context directory
+        id: context
+        run: |
+          mkdir -p context
+          cp -R builder/env builder/inventory builder/repo builder/bashrc context 
+          cp -R "builder/devel/"" context
+          cp "builder/ee-${matrix.ee_context}.yml" context/execution-environment.yml
+          ls -la context
 
       - name: Create image context
         run: |
-          ansible-builder create \
-            --context=builder/${{ matrix.ee_context }} \
-            --file=builder/${{ matrix.ee_context }}/execution-environment.yml
-          
+          ansible-builder create --context=context 
+
       - name: Upload resulting Containerfile
         uses: actions/upload-artifact@v3
         with:
           name: Containerfile
-          path: builder/${{ matrix.ee_context }}/Containerfile
+          path: context/Containerfile
       
       - name: Build image from context
         uses: redhat-actions/buildah-build@v2
         with:
-          context: builder/${{ matrix.ee_context }}
+          context: context
           image: ${{ github.repository }}
           containerfiles: |
-            builder/${{ matrix.ee_context }}/Containerfile
+            context/Containerfile
 
       # See https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
       - name: Save PR number
