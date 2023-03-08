@@ -108,7 +108,7 @@ jobs:
           echo "## :pushpin: Installed roles:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "`podman run ${{ steps.push-image.outputs.registry-path }} ansible-galaxy collection role`" >> $GITHUB_STEP_SUMMARY
+          echo "`podman run ${{ steps.push-image.outputs.registry-path }} ansible-galaxy role list`" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "## :pushpin: Containerfile:" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
