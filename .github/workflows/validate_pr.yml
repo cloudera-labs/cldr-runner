@@ -49,6 +49,7 @@ jobs:
         working-directory: ${{ matrix.ee_profile }}
         run: |
           ansible-builder create
+          ls -laR 
 
       - name: Upload resulting Containerfile
         uses: actions/upload-artifact@v3
