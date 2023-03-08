@@ -11,14 +11,12 @@ permissions:
   packages: write
 
 jobs:
-  publish-base:
-    uses: ./.github/workflows/build_and_push_image.yml
+  publish:
+    uses: ./.github/workflows/build_push_image.yml
+    strategy:
+      fail-fast: false
+      matrix:
+        ee_profile: ["full", "base", "aws", "azure", "gcp"]
     with:
-      BRANCH_TYPE: main
-      CONTEXT_TYPE: base
-
-  publish-full:
-    uses: ./.github/workflows/build_and_push_image.yml
-    with:
-      BRANCH_TYPE: main
-      CONTEXT_TYPE: full
+      BRANCH: main
+      PROFILE: ${{ matrix.ee_profile }}
