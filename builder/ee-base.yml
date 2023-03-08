@@ -6,7 +6,7 @@ version: 1
 
 build_arg_defaults:
   EE_BASE_IMAGE: "quay.io/ansible/ansible-runner:stable-2.12-latest"
-  EE_BUILDER_IMAGE: "ghcr.io/cloudera-labs/ansible-builder:${BUILD_TAG:-latest}"
+  EE_BUILDER_IMAGE: "ghcr.io/cloudera-labs/ansible-builder:latest"
 
 dependencies:
   galaxy: galaxy.yml
@@ -15,7 +15,8 @@ dependencies:
 
 additional_build_steps:
   prepend: |
-    ENV CLDR_BUILD_VER=${BUILD_TAG:-latest}
+    ARG BUILD_VER="latest"
+    ENV CLDR_BUILD_VER=$BUILD_VER
     ENV PKGMGR_OPTS="--nodocs --setopt install_weak_deps=0"
     COPY . /tmp/src
     RUN mv /tmp/src/bashrc /home/runner/.bashrc && \

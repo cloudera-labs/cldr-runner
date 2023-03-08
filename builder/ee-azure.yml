@@ -1,6 +1,6 @@
 ---
 
-# Full cldr-runner (aka kitchen sink)
+# Azure cldr-runner
 
 version: 1
 
@@ -23,21 +23,12 @@ additional_build_steps:
         mv /tmp/src/repo/*.repo /etc/yum.repos.d/ && \
         mv /tmp/src/env /tmp/src/inventory /runner && \
         /usr/bin/python3 -m pip install --upgrade pip && \
+        dnf install -y terraform --nodocs --setopt install_weak_deps=0 && \
         rpm --import https://packages.microsoft.com/keys/microsoft.asc && \
-        dnf install -y terraform kubectl vim nano git unzip --nodocs --setopt install_weak_deps=0 && \
-        curl -o /usr/local/bin/aws-iam-authenticator https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/aws-iam-authenticator && \
-        chmod +x /usr/local/bin/aws-iam-authenticator && \
-        curl -o /tmp/awscliv2.zip https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip && \
-        unzip /tmp/awscliv2.zip -d /tmp && \
-        /tmp/aws/install && \
-        rm /tmp/awscliv2.zip && rm -rf /tmp/aws \
-        dnf clean all && \
-        dnf install -y google-cloud-sdk && \
         dnf download azure-cli && \
         rpm -ivh --nodeps azure-cli-*.rpm && \
         rm -f azure-cli-*.rpm && \
-        pip install azure-cli-core==2.30.0 --upgrade && \
-        /usr/bin/python3 -m pip cache purge
+        pip install azure-cli-core==2.30.0 --upgrade
   append: |
     ENV PATH "$PATH:/home/runner/.local/bin"
     RUN alternatives --set python /usr/bin/python3 && \
