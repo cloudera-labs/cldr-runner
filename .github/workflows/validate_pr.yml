@@ -21,6 +21,7 @@ on:
     branches:
       - 'devel'
       - 'devel-pvc-update'
+  workflow_dispatch:
     
 jobs:
   validate:
