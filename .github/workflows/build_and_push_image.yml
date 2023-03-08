@@ -1,23 +1,18 @@
 ---
 # See https://github.com/cloin/ee-builds
 
-name: Build and deploy Execution Environment
+name: Build and push Execution Environment image to Packages
 
 on:
   workflow_call:
     inputs:
-      EE_CONTEXT_FOLDER:
-        description: 'path of the directory for the generated EE container file and supporting assets'
-        required: false
+      BRANCH_TYPE:
+        description: 'Upstream collections branch type'
+        required: true
         type: string
-      EE_CONFIG_FILE:
-        description: 'path of the EE configuration file'
-        default: execution-environment.yml
-        required: false
-        type: string
-      EE_MOUNT_FOLDER:
-        description: 'path of the build folder to mount into the ansible-builder container'
-        required: false
+      CONTEXT_TYPE:
+        description: 'Execution profile type'
+        required: true
         type: string
     outputs:
       image-paths:
@@ -61,42 +56,29 @@ jobs:
         id: sha
         run: echo "sha-short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
+      - name: Set up context directory
+        id: context
+        run: |
+          mkdir -p context
+          cp -R builder/env builder/inventory builder/repo builder/bashrc context 
+          cp -R "builder/${input.BRANCH_TYPE}/"" context
+          cp "builder/ee-${input.CONTEXT_TYPE}.yml" context/execution-environment.yml
+          ls -la context
+
       - name: Create image context
         run: |
-          ansible-builder create \
-            --context=${{ inputs.EE_CONTEXT_FOLDER }} \
-            --file=${{ inputs.EE_CONFIG_FILE }}
+          ansible-builder create --context=context
+          ls -la context
       
-      - name: Copy build directory to volume mount and adjust container file
-        if: ${{ inputs.EE_MOUNT_FOLDER }}
-        run: |
-          sed -i 's/_build/${{ inputs.EE_MOUNT_FOLDER }}/g' \
-            ${{ inputs.EE_CONTEXT_FOLDER }}/Containerfile
-          cp ${{ inputs.EE_CONTEXT_FOLDER }}/_build/* ${{ inputs.EE_MOUNT_FOLDER }}
-          ls -la
-          echo $(cat ${{ inputs.EE_CONTEXT_FOLDER }}/Containerfile)
-
       - name: Build image from context folder
-        if: ${{ ! inputs.EE_MOUNT_FOLDER }}
         uses: redhat-actions/buildah-build@v2
         with:
-          context: ${{ inputs.EE_CONTEXT_FOLDER }}
+          context: context
           image: ${{ github.repository }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           containerfiles: |
-            ${{ inputs.EE_CONTEXT_FOLDER }}/Containerfile
-
-      - name: Build image from mount folder
-        if: ${{ inputs.EE_MOUNT_FOLDER }}
-        uses: redhat-actions/buildah-build@v2
-        with:
-          context: ${{ inputs.EE_MOUNT_FOLDER }}
-          image: ${{ github.repository }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          containerfiles: |
-            ${{ inputs.EE_CONTEXT_FOLDER }}/Containerfile
+            context/Containerfile
 
       - name: Push image
         id: push-image
@@ -107,7 +89,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Print summary
-        working-directory: ${{ inputs.EE_CONTEXT_FOLDER }}
+        working-directory: context
         run: |
           echo "## :rocket: Usage" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
