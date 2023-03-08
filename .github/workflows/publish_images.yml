@@ -1,0 +1,24 @@
+---
+
+name: Publish Execution Environment images
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish-base:
+    uses: ./.github/workflows/build_and_push_image.yml
+    with:
+      BRANCH_TYPE: main
+      CONTEXT_TYPE: base
+
+  publish-full:
+    uses: ./.github/workflows/build_and_push_image.yml
+    with:
+      BRANCH_TYPE: main
+      CONTEXT_TYPE: full
