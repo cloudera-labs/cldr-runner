@@ -12,7 +12,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.PKG_PAT }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get Date of Base Build
         id: date
