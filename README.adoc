@@ -85,6 +85,8 @@ The `local_environment.yml` playbook sets up a `cldr-runner`-like workspace for 
 
 NOTE: The cloned Cloudera collections and cdpy project use the `main` branches by default. Manipulating the branches, etc. is outside the scope of the `local_environment.yml` playbook.
 
+NOTE: If you are using an M1 or M2 Macbook, to ensure compatibility and prevent library incompatibilities between architectures, enable the Rosetta within your terminal. Go to Finder > Applications and find your Terminal > Right-Click on your Terminal  > Get Info > Enable "Open using Rosetta"
+
 Development in this manner starts with sourcing the setup script, activating the virtual environment, and then switching to and running `cldr-runner`-based applications, such as `cloudera-deploy`, within their own projects while using the development environment's collections and tools. 
 
 You can change the execution environment by updating the Git-backed projects within the `ansible_collections` directory of the development environment or wholesale by changing the virtual environment and/or pointing to other development environments via the Ansible collection and role paths (see the setup scripts for details).
