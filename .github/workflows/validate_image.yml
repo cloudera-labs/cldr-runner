@@ -61,19 +61,20 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ inputs.PROFILE }}-Containerfile
-          path: ${{ inputs.PROFILE }}/Containerfile
+          path: ./Containerfile
       
       - name: Download the base image
         if: ${{ inputs.PROFILE != 'base' }}
         uses: actions/download-artifact@v3
         with:
           name: base-${{ steps.sha.outputs.sha-short }}
-          path: base-${{ steps.sha.outputs.sha-short }}
+          path: /tmp
 
       - name: Load the base image
         if: ${{ inputs.PROFILE != 'base' }}
         run: |
-          podman load -i base-${{ steps.sha.outputs.sha-short }}
+          podman load -i /tmp/base-${{ steps.sha.outputs.sha-short }}.tar
+          podman image ls -a
 
       - name: Build image from builder context
         uses: redhat-actions/buildah-build@v2
@@ -93,11 +94,11 @@ jobs:
         env:
           BASE_IMAGE: base-${{ steps.sha.outputs.sha-short }}
         run: |
-          podman save --output ${{ env.BASE_IMAGE }} ${{ github.repository }}:${{ env.BASE_IMAGE }}
+          podman save --output /tmp/${{ env.BASE_IMAGE }}.tar ${{ github.repository }}:${{ env.BASE_IMAGE }}
 
       - name: Upload base image
         if: ${{ inputs.PROFILE == 'base' }}
         uses: actions/upload-artifact@v3
         with:
           name: base-${{ steps.sha.outputs.sha-short }}
-          path: base-${{ steps.sha.outputs.sha-short }}
+          path: /tmp/base-${{ steps.sha.outputs.sha-short }}.tar
