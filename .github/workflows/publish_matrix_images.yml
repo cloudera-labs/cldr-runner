@@ -1,0 +1,28 @@
+---
+
+name: Publish the matrix of Execution Environment images
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+
+  publish-base:
+    uses: ./.github/workflows/build_push_image.yml
+    with:
+      PROFILE: base
+
+  publish-profiles:
+    needs: publish-base
+    uses: ./.github/workflows/build_push_image.yml
+    strategy:
+      fail-fast: false
+      matrix:
+        ee_profile: ["aws"] #["full", "base", "aws", "azure", "gcp"]
+    with:
+      PROFILE: ${{ matrix.ee_profile }}

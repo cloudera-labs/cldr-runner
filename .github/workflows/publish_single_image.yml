@@ -1,0 +1,28 @@
+---
+
+name: Publish a single Execution Environment image
+
+on:
+  workflow_dispatch:
+    inputs:
+      PROFILE:
+        description: 'Execution profile'
+        default: 'base'
+        required: false
+        type: choice
+        options:
+          - base
+          - aws
+          - azure
+          - gcp
+          - full
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    uses: ./.github/workflows/build_push_image.yml
+    with:
+      PROFILE: ${{ inputs.PROFILE }}
