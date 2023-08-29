@@ -22,7 +22,14 @@ permissions:
   packages: write
 
 jobs:
-  publish:
+  publish-base:
+    uses: ./.github/workflows/build_push_image.yml
+    with:
+      PROFILE: base
+
+  publish-profiles:
+    if: ${{ inputs.PROFILE != 'base' }}
+    needs: publish-base
     uses: ./.github/workflows/build_push_image.yml
     with:
       PROFILE: ${{ inputs.PROFILE }}

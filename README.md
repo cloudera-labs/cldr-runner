@@ -1,6 +1,6 @@
 # Cloudera Ansible Execution Environments
 
-`cldr-runner` is set of Ansible [Execution Environments](https://ansible.readthedocs.io/projects/builder/en/stable/#execution-environments) for running Cloudera playbooks, examples, and general automation for both CDP Public Cloud, Private Cloud, and Data Services. These images are appropriate for use with `ansible-navigator`[^navigator] and AWS/AAP.
+`cldr-runner` is set of Ansible [Execution Environments](https://ansible.readthedocs.io/projects/builder/en/stable/#execution-environments) for running Cloudera playbooks, examples, and general automation for both CDP Public Cloud, Private Cloud, and Data Services. These images are appropriate for use with `ansible-navigator`[^1] and AWS/AAP.
 
 `cldr-runner` consists of several variations:
 
@@ -48,7 +48,7 @@ ansible-navigator:
     image: <your cldr-runner image tag>
 ```
 
-You can specify the image via the CLI[^navigator], e.g. `--eei` or `--execution-environment-image`.
+You can specify the image via the CLI[^1], e.g. `--eei` or `--execution-environment-image`.
 
 ## Local Development
 
@@ -150,4 +150,4 @@ Signed-off-by: John Doe <jdoe@example.com>
 
 TIP! Add the sign-off automatically when creating the commit via the `-s` flag, e.g. `git commit -s``.
 
-[^navigator] https://ansible.readthedocs.io/projects/navigator/
+[^1] https://ansible.readthedocs.io/projects/navigator/

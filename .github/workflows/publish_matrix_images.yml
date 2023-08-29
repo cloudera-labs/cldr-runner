@@ -1,6 +1,6 @@
 ---
 
-name: Publish the matrix of Execution Environment images
+name: Publish all Execution Environment images
 
 on:
   release:
@@ -23,6 +23,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ee_profile: ["aws"] #["full", "base", "aws", "azure", "gcp"]
+        ee_profile: ["aws", "azure", "gcp", "full"]
     with:
       PROFILE: ${{ matrix.ee_profile }}
