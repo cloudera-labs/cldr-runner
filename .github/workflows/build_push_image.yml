@@ -7,7 +7,7 @@ on:
   workflow_call:
     inputs:
       PROFILE:
-        description: 'Execution profile'
+        description: 'Execution Environment profile'
         required: true
         type: string
     outputs:

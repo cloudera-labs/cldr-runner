@@ -1,0 +1,98 @@
+---
+
+name: Build (validate) Execution Environment image
+
+# See https://docs.docker.com/build/ci/github-actions/share-image-jobs/
+
+on:
+  workflow_call:
+    inputs:
+      PROFILE:
+        description: 'Execution profile'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install latest ansible-builder
+        run: pip install ansible-builder
+    
+      - name: Construct image metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}
+          flavor: |
+            latest=auto
+            prefix=${{ inputs.PROFILE }}-,onlatest=true
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix=${{ inputs.PROFILE }}-
+
+      - name: Construct short SHA
+        id: sha
+        run: echo "sha-short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Update container base image reference
+        if: ${{ inputs.PROFILE != 'base' }}
+        env:
+          REPLACEMENT_IMAGE: ${{ github.repository }}:base-${{ steps.sha.outputs.sha-short }}
+        run:
+          sed -i 's|cloudera-labs/cldr-runner:base-latest|${{ env.REPLACEMENT_IMAGE }}|' ${{ inputs.PROFILE }}/execution-environment.yml
+
+      - name: Create builder context
+        run: |
+          ansible-builder create --file ${{ inputs.PROFILE }}/execution-environment.yml
+
+      - name: Upload Containerfile
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ inputs.PROFILE }}-Containerfile
+          path: ${{ inputs.PROFILE }}/Containerfile
+      
+      - name: Download the base image
+        if: ${{ inputs.PROFILE != 'base' }}
+        uses: actions/download-artifact@v3
+        with:
+          name: base-${{ steps.sha.outputs.sha-short }}
+          path: base-${{ steps.sha.outputs.sha-short }}
+
+      - name: Load the base image
+        if: ${{ inputs.PROFILE != 'base' }}
+        run: |
+          podman load -i base-${{ steps.sha.outputs.sha-short }}
+
+      - name: Build image from builder context
+        uses: redhat-actions/buildah-build@v2
+        with:
+          context: ./context
+          containerfiles: |
+            ./context/Containerfile
+          build-args: |
+            BUILD_VER=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+            BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            BUILD_REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
+          image: ${{ github.repository }}
+          tags: ${{ steps.meta.outputs.tags }}
+          extra-args: |
+            --output type=tar,dest=${{ inputs.PROFILE }}-${{ steps.sha.outputs.sha-short }}
+
+      - name: Upload base image
+        if: ${{ inputs.PROFILE == 'base' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ inputs.PROFILE }}-${{ steps.sha.outputs.sha-short }}
+          path: ${{ inputs.PROFILE }}-${{ steps.sha.outputs.sha-short }}
