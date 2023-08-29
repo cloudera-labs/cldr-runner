@@ -87,12 +87,17 @@ jobs:
             BUILD_REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
           image: ${{ github.repository }}
           tags: ${{ steps.meta.outputs.tags }}
-          extra-args: |
-            --output type=tar,dest=${{ inputs.PROFILE }}-${{ steps.sha.outputs.sha-short }}
+
+      - name: Save the base image
+        if: ${{ inputs.PROFILE == 'base' }}
+        env:
+          BASE_IMAGE: base-${{ steps.sha.outputs.sha-short }}
+        run: |
+          podman save --output ${{ env.BASE_IMAGE }} ${{ github.repository }}:${{ env.BASE_IMAGE }}
 
       - name: Upload base image
         if: ${{ inputs.PROFILE == 'base' }}
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ inputs.PROFILE }}-${{ steps.sha.outputs.sha-short }}
-          path: ${{ inputs.PROFILE }}-${{ steps.sha.outputs.sha-short }}
+          name: base-${{ steps.sha.outputs.sha-short }}
+          path: base-${{ steps.sha.outputs.sha-short }}
