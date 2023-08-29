@@ -98,6 +98,11 @@ jobs:
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "`podman run ${{ steps.push-image.outputs.registry-path }} ansible --version`" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "## :pushpin: Terraform info:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "`podman run ${{ steps.push-image.outputs.registry-path }} terraform --version`" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "## :pushpin: Installed Python libraries:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
