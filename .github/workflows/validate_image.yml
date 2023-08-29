@@ -61,7 +61,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ inputs.PROFILE }}-Containerfile
-          path: ./Containerfile
+          path: ./context/Containerfile
       
       - name: Download the base image
         if: ${{ inputs.PROFILE != 'base' }}
@@ -102,3 +102,4 @@ jobs:
         with:
           name: base-${{ steps.sha.outputs.sha-short }}
           path: /tmp/base-${{ steps.sha.outputs.sha-short }}.tar
+          retention-days: 2
