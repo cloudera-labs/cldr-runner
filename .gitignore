@@ -1,2 +1,2 @@
-builder/contexts
+**/context
 .pytest_cache

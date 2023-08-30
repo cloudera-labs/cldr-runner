@@ -1,0 +1,49 @@
+---
+
+# Copyright 2023 Cloudera, Inc. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Azure cldr-runner
+
+version: 3
+
+images:
+  base_image:
+    name: ghcr.io/cloudera-labs/cldr-runner:base-latest
+
+dependencies:
+  galaxy: requirements.yml
+  python: requirements.txt
+  system: bindep.txt
+      
+additional_build_steps:
+  prepend_final:
+    - ARG BUILD_VER="azure-latest"
+    - ARG BUILD_DATE="unknown"
+    - ARG BUILD_REVISION="unknown"
+    - ENV BUILD_VER="${BUILD_VER}"
+    - ENV BUILD_DATE="${BUILD_DATE}"
+    - ENV BUILD_REVISION="${BUILD_REVISION}"
+    - LABEL org.opencontainers.image.title="cldr-runner azure"
+      org.opencontainers.image.description="Ansible Execution Environment with collections and dependencies for CDP Public Cloud, Private Cloud, and Data Services for Azure."
+      org.opencontainers.image.created="${BUILD_DATE}"
+      org.opencontainers.image.version="${BUILD_VER}"
+      org.opencontainers.image.revision="${BUILD_REVISION}"
+  # See https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=dnf
+  append_final: >
+    RUN rpm --import https://packages.microsoft.com/keys/microsoft.asc && \
+      dnf install -y https://packages.microsoft.com/config/rhel/8/packages-microsoft-prod.rpm && \
+      dnf install -y azure-cli && \
+      dnf clean all -y && \
+      rm -rf /var/cache/yum /var/cache/dnf /tmp/src 

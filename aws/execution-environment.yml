@@ -1,0 +1,52 @@
+---
+
+# Copyright 2023 Cloudera, Inc. All Rights Reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# AWS cldr-runner
+
+version: 3
+
+images:
+  base_image:
+    name: ghcr.io/cloudera-labs/cldr-runner:base-latest
+
+dependencies:
+  galaxy: requirements.yml
+  python: requirements.txt
+  system: bindep.txt
+
+additional_build_steps:
+  # See https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html
+  # See https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html#cliv2-linux-install
+  prepend_final:
+    - ARG BUILD_VER="aws-latest"
+    - ARG BUILD_DATE="unknown"
+    - ARG BUILD_REVISION="unknown"
+    - ENV BUILD_VER="${BUILD_VER}"
+    - ENV BUILD_DATE="${BUILD_DATE}"
+    - ENV BUILD_REVISION="${BUILD_REVISION}"
+    - LABEL org.opencontainers.image.title="cldr-runner aws"
+      org.opencontainers.image.description="Ansible Execution Environment with collections and dependencies for CDP Public Cloud, Private Cloud, and Data Services for AWS."
+      org.opencontainers.image.created="${BUILD_DATE}"
+      org.opencontainers.image.version="${BUILD_VER}"
+      org.opencontainers.image.revision="${BUILD_REVISION}"
+  append_final: |
+    RUN curl -Lo /usr/local/bin/aws-iam-authenticator https://github.com/kubernetes-sigs/aws-iam-authenticator/releases/download/v0.5.9/aws-iam-authenticator_0.5.9_linux_amd64 && \
+        chmod +x /usr/local/bin/aws-iam-authenticator
+    RUN curl -o /tmp/awscliv2.zip https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip && \
+        unzip /tmp/awscliv2.zip -d /tmp && \
+        /tmp/aws/install --update && \
+        rm /tmp/awscliv2.zip && \
+        rm -rf /tmp/aws

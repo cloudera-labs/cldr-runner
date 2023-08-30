@@ -1,6 +1,0 @@
-# Source global definitions
-if [ -f /etc/bashrc ]; then
-. /etc/bashrc
-fi
-
-PS1="\[\e[1;38;5;202m\]cldr ${CLDR_BUILD_VER} \[\e[0m\]\\$> "

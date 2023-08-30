@@ -6,12 +6,8 @@ name: Build and push Execution Environment image to Packages
 on:
   workflow_call:
     inputs:
-      BRANCH:
-        description: 'Upstream collections branch'
-        required: true
-        type: string
       PROFILE:
-        description: 'Execution profile'
+        description: 'Execution Environment profile'
         required: true
         type: string
     outputs:
@@ -19,7 +15,7 @@ on:
         description: 'all the constructed and pushed image paths'
         value: ${{ jobs.build-push.outputs.registry-paths }}
       image-sha:
-        description: 'the SHA tagged image path'
+        description: 'the SHA-tagged image path'
         value: ghcr.io/${{ github.repository }}:sha-${{ jobs.build-push.outputs.sha-short }}
 
 permissions:
@@ -36,8 +32,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install ansible-builder
-        run: pip install ansible-builder==1.2.0
+      - name: Install latest ansible-builder
+        run: pip install ansible-builder
 
       - name: Construct image metadata
         id: meta
@@ -49,36 +45,39 @@ jobs:
             latest=auto
             prefix=${{ inputs.PROFILE }}-,onlatest=true
           tags: |
-            type=sha,prefix=${{ inputs.PROFILE }}-sha-
-            type=ref,event=branch
-            type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha,prefix=${{ inputs.PROFILE }}-
 
       - name: Construct short SHA
         id: sha
         run: echo "sha-short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
 
-      - name: Set up context
-        run: |
-          mkdir -p ${{ inputs.PROFILE }}
-          cp -R builder/${{ inputs.BRANCH }}/* ${{ inputs.PROFILE }}
-          cp builder/ee-${{ inputs.PROFILE }}.yml ${{ inputs.PROFILE }}/execution-environment.yml
-          cp -R builder/env builder/inventory builder/repo builder/bashrc ${{ inputs.PROFILE }}
+      - name: Update container base image reference
+        if: ${{ inputs.PROFILE != 'base' }}
+        env:
+          REPLACEMENT_IMAGE: ${{ github.repository }}:base-${{ steps.sha.outputs.sha-short }}
+        run:
+          sed -i 's|cloudera-labs/cldr-runner:base-latest|${{ env.REPLACEMENT_IMAGE }}|' ${{ inputs.PROFILE }}/execution-environment.yml
 
-      - name: Create Containerfile
+      - name: Create builder context
         run: |
-          ansible-builder create --context ${{ inputs.PROFILE }} --file ${{ inputs.PROFILE }}/execution-environment.yml
+          ansible-builder create --file ${{ inputs.PROFILE }}/execution-environment.yml
       
-      - name: Build image from context
+      - name: Build image from builder context
         uses: redhat-actions/buildah-build@v2
         with:
-          context: ${{ inputs.PROFILE }}
+          context: ./context
+          containerfiles: |
+            ./context/Containerfile
+          build-args: |
+            BUILD_VER=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+            BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+            BUILD_REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
           image: ${{ github.repository }}
           tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          containerfiles: |
-            ${{ inputs.PROFILE }}/Containerfile
 
       - name: Push image
         id: push-image
@@ -89,7 +88,6 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Print summary
-        working-directory: ${{ inputs.PROFILE }}
         run: |
           echo "## :rocket: Usage" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -99,6 +97,11 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "`podman run ${{ steps.push-image.outputs.registry-path }} ansible --version`" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "## :pushpin: Terraform info:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "`podman run ${{ steps.push-image.outputs.registry-path }} terraform --version`" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "## :pushpin: Installed Python libraries:" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -117,5 +120,5 @@ jobs:
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "## :pushpin: Containerfile:" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "`cat Containerfile`" >> $GITHUB_STEP_SUMMARY
+          echo "`cat ./context/Containerfile`" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
