@@ -157,6 +157,8 @@
           collection: cluster
         - repo: git@github.com:cloudera-labs/cloudera.exe.git
           collection: exe
+        - repo: git@github.com:ansible-collections/cloud.terraform.git
+          collection: terraform
       register: __cldr_collections
       tags:
         - collections
