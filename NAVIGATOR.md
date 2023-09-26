@@ -4,7 +4,7 @@
 
 ## Installation
 
-Setting up `ansible-navigator` is easy; you can spin up a new setup in **TWO** steps (see note below for important details)!
+Setting up `ansible-navigator` is easy; you can spin up a new setup in **TWO** steps (plus your OS requirements, see note below for important details)!
 
 1. Create and activate a new `virtualenv`.
 
@@ -22,10 +22,8 @@ Setting up `ansible-navigator` is easy; you can spin up a new setup in **TWO** s
     pip install ansible-core ansible-navigator
    ```
 
-Read more about [installing `ansible-navigator`](https://ansible.readthedocs.io/projects/navigator/installation/#install-ansible-navigator).
-
 > [!IMPORTANT]
-> Please note each OS has slightly different requirements for installing `ansible-navigator`. :woozy_face:
+> Please note each OS has slightly different requirements for installing `ansible-navigator`. :woozy_face: Read more about [installing `ansible-navigator`](https://ansible.readthedocs.io/projects/navigator/installation/#install-ansible-navigator).
 
 ## Usage
 
