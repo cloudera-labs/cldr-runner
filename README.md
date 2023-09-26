@@ -16,7 +16,7 @@ Specifically, the project consists of `execution-environment.yml` configuration 
 | [gcp](gcp/execution-environment.yml) | `base` plus GCP-specific collections and dependencies, including the `gcloud` CLI |
 | [full](full/execution-environment.yml) | All of the above, plus additional CLI tools for in-container usage, e.g. `git`, `vim`, `nano`, `tree`, `kubectl` |
 
-## Quickstart
+# Quickstart
 
 `cldr-runner` is designed to run with `ansible-navigator` and other _Execution Environment_-based tools. You might want to [install `ansible-navigator`](NAVIGATOR.md) before delving deeper.
 
@@ -25,7 +25,7 @@ Specifically, the project consists of `execution-environment.yml` configuration 
 3. [Customizing or extending images](#customizing)
 4. [Making a local development environment](#local-development)
 
-## Roadmap
+# Roadmap
 
 If you want to see what we are working on or have pending, check out:
 
@@ -35,15 +35,15 @@ If you want to see what we are working on or have pending, check out:
 
 Are we missing something? Let us know by [creating a new issue](https://github.com/cloudera-labs/cldr-runner/issues/new) or [posting a new idea](https://github.com/cloudera-labs/cldr-runner/discussions/new?category=ideas)!
 
-## Contributing
+# Contributing
 
 For more information on how to get involved with the `cldr-runner` project, head over to [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## Installing and Using
+# Installing and Using
 
 You can run Ansible within `cldr-runner` Execution Environments a couple of different ways. Here are the most common:
 
-### `ansible-navigator` 
+## `ansible-navigator` 
 
 Using a `cldr-runner` image in the [`ansible-navigator` application](https://ansible.readthedocs.io/projects/navigator/) as the designated [Execution Environment](https://docs.ansible.com/ansible/devel/getting_started_ee/index.html) is straightforward. Update your `ansible-navigator.yml` configuration file to enable the image:
 
@@ -62,7 +62,7 @@ Once defined, you can run your Ansible activities within the resulting `cldr-run
 > [!NOTE]
 > If you want to "drop into" the container directly, i.e. run a shell within the container, run `ansible-navigator exec -- /bin/bash` and all the mounts, environment variables, etc. are handled for you!! Now from the shell, you can still run `ansible-playbook` and all other Ansible applications. 
 
-### AWX/AAP
+## AWX/AAP
 
 You can specify a `cldr-runner` image as an [Execution Environment](https://docs.ansible.com/automation-controller/latest/html/userguide/execution_environments.html).
 
@@ -70,7 +70,7 @@ You can specify a `cldr-runner` image as an [Execution Environment](https://docs
 
 Once defined, the EE can be used by Job Templates, Container Groups, etc.
 
-### `docker run`
+## `docker run`
 
 > [!WARNING]
 > This mode of operation is not suggested. If you need direct container access, use `ansible-navigator exec -- /bin/bash` as suggested in the [section above](#ansible-navigator).
@@ -83,7 +83,7 @@ docker run -it ghcr.io/cloudera-labs/cldr-runner:aws-latest /bin/bash
 
 Take care to assemble and mount the needed directories other supporting assets; the image is based on [`ansible-runner`](https://ansible.readthedocs.io/projects/runner/en/stable/) (as are all Execution Environments) and runs as such.
 
-## Building
+# Building
 
 If you need to construct a local image, first set up a Python virtual environment with the latest `ansible-core` and `ansible-builder`:
 
@@ -110,7 +110,7 @@ images:
 
 The resulting image will now be loaded into your local image cache.
 
-## Customizing
+# Customizing
 
 A common approach to using `cldr-runner` is to use it as a base and add additional resources -- like other Ansible collections -- for use with your playbooks, and [`ansible-builder`]() handles for this activity.
 
@@ -158,7 +158,7 @@ ansible-navigator:
       policy: missing
 ```
 
-## Local Development
+# Local Development
 
 The `cldr-runner` project can also be used to bootstrap a local development environment on the native host environment (as opposed to an Execution Environment image).  This option is more involved, but can avoid issues with Docker, such as mount latencies and SSH agent forwarding, and improve overall Ansible collection development. 
 
@@ -205,7 +205,7 @@ Follow these steps to set up a local environment:
     source <your development directory>/setup-ansible-env.sh
     ```
 
-## License and Copyright
+# License and Copyright
 
 Copyright 2023, Cloudera, Inc.
 

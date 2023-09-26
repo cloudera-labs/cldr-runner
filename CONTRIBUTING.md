@@ -2,7 +2,7 @@
 
 Thank you for considering contributions to the `cldr-runner` project!
 
-## Submitting a pull request
+# Submitting a pull request
 
 You can start work on issues that are not yet part of a [Milestone](https://github.com/cloudera-labs/cldr-runner/milestones) -- anything in our issue tracker that isn't assigned to a Milestone is considered the [backlog](https://github.com/cloudera-labs/cldr-runner/issues?q=is%3Aopen+is%3Aissue+no%3Amilestone). 
 
@@ -21,7 +21,7 @@ As a _best practice_, you can prefix your branches with:
 > [!NOTE]
 > :fire_extinguisher: A **hotfix** should branch from `main`. It will then be committed to both the `main` and `devel` branches.
 
-## Signing your commits
+# Signing your commits
 
 Note that we require signed commits inline with [Developer Certificate of Origin](https://developercertificate.org/) best-practices for open source collaboration.
 
@@ -77,6 +77,6 @@ Signed-off-by: John Doe <jdoe@example.com>
 > [!NOTE]
 > :rocket: TIP! Add the sign-off automatically when creating the commit via the `-s` flag, e.g. `git commit -s`.
 
-## Still have questions? Opinions? Comments?
+# Have questions? Opinions? Comments?
 
 Come find us on our [Discussions](https://github.com/cloudera-labs/cldr-runner/discussions)!

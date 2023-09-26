@@ -2,7 +2,7 @@
 
 > `ansible-navigator` is a command-line tool and a text-based user interface (TUI) for creating, reviewing, running and troubleshooting Ansible content, including inventories, playbooks, collections, documentation and container images (execution environments).
 
-## Installation
+# Installation
 
 Setting up `ansible-navigator` is easy; you can spin up a new setup in **TWO** steps (plus your OS requirements, see note below for important details)!
 
@@ -25,11 +25,11 @@ Setting up `ansible-navigator` is easy; you can spin up a new setup in **TWO** s
 > [!IMPORTANT]
 > Please note each OS has slightly different requirements for installing `ansible-navigator`. :woozy_face: Read more about [installing `ansible-navigator`](https://ansible.readthedocs.io/projects/navigator/installation/#install-ansible-navigator).
 
-## Usage
+# Usage
 
 `ansible-navigator` can be viewed as a wrapper around the core Ansible application, like `ansible-playbook`, `ansible-galaxy`, `ansible-doc`, etc. Read more about how to [configure](https://ansible.readthedocs.io/projects/navigator/settings/) your setup and your project execution as well as the [mapping](https://ansible.readthedocs.io/projects/navigator/subcommands/#mapping-ansible-navigator-commands-to-ansible-commands) of and [running](https://ansible.readthedocs.io/projects/navigator/subcommands/) of these subcommands.
 
-### Common commands
+## Common commands
 
 | Command | Description |
 |---------|-------------|
@@ -38,13 +38,13 @@ Setting up `ansible-navigator` is easy; you can spin up a new setup in **TWO** s
 | `ansible-navigator doc cloudera.cloud.datahub_service -t lookup` | View the `ansible-docs` of the [`cloudera.cloud.datahub_service` lookup](https://wmudge.github.io/cloudera.cloud/datahub_service_lookup.html) plugin. |
 | `ansible-navigator exec -- ansible localhost -m cloudera.cloud.env_info -a 'name=my_env'` | Query the Cloudera Data Platform (CDP) Public Cloud for details on the `my_env` Environment. |
 
-## Advanced Usage: Execution Modes
+# Advanced Usage: Execution Modes
 
 `ansible-navigator` typically executes Ansible using the Ansible runtime, collections, and roles built into the _execution environment_, but this is not the only way you can use the tool. In fact, there are **four** modes of execution with `ansible-navigator`, each providing a growing degree of control and customization as well as complexity. Yet, `ansible-navigator` provides a common interface to all modes, allowing you to switch seamlessly from one mode to another.
 
 Each mode is enabled by the presence of certain paths (e.g. `ANSIBLE_COLLECTIONS_PATHS`, `./collections`) and configuration parameters (e.g. `--execution-environment`).
 
-### User Mode
+## User Mode
 
 | Collections path | Ansible runtime |
 |------------------|-----------------|
@@ -52,7 +52,7 @@ Each mode is enabled by the presence of certain paths (e.g. `ANSIBLE_COLLECTIONS
 
 This is the default mode for using _execution environments_ like `cldr-runner`. All executable assets and dependencies are bundled into the image. All that is needed to run is `ansible-navigator` itself; the tool will collect and inject everything into the running container.
 
-### Power User Mode
+## Power User Mode
 
 | Collections path | Ansible runtime |
 |------------------|-----------------|
@@ -62,7 +62,7 @@ If `ansible-navigator` discovers a `./collections` directory in the project, it 
 
 See the [Placement of Ansible collections](https://ansible.readthedocs.io/projects/navigator/faq/#placement-of-ansible-collections) section for further details.
 
-### Developer Mode
+## Developer Mode
 
 | Collections path | Ansible runtime |
 |------------------|-----------------|
@@ -85,7 +85,7 @@ See the [Placement of Ansible collections](https://ansible.readthedocs.io/projec
 
 The [local development](README.md#local-development) instructions are designed to support this mode. 
 
-### Platform Mode
+## Platform Mode
 
 | Collections path | Ansible runtime |
 |------------------|-----------------|
@@ -108,6 +108,6 @@ See the [Execution Environment configuration](https://ansible.readthedocs.io/pro
 
 This is a fairly common task then [running CI jobs](https://github.com/cloudera-labs/cloudera.cluster/blob/main/.github/workflows/validate_pr.yml) for individual collections. The [local development](README.md#local-development) instructions are designed to support this mode.
 
-## Troubleshooting
+# Troubleshooting
 
 The [Frequently Asked Questions](FAQ.md) guide has a collection of relevant troubleshooting topics. You can also stop by the [Discussion > Help](https://github.com/cloudera-labs/cldr-runner/discussions/categories/help) category for the latest answers.
