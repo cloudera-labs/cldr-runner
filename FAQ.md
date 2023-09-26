@@ -12,33 +12,37 @@ Like tags, so you can pass _extra variables_ to `ansible-navigator` and the unde
 
 ### How do I tell `ansible-navigator` where to find collections and roles?
 
-By default, `cloudera-deploy` expects to use the collections, roles, and libraries within the _execution environment_ container, that is `cldr-runner`. Make sure you do _not_ have `ANSIBLE_COLLECTIONS_PATH` or `ANSIBLE_ROLES_PATH` set or `ansible-navigator` will pick up these environment variables and pass them to the running container. The underlying `ansible` application, like `ansible-playbook` will then pick up these environment variables and attempt to use them if set! This behavior is great if you want to use host-based collections, e.g. local development, but you need to ensure that you update the `ansible-navigator.yml` configuration file to mount the host collection and/or role directories into the execution environment container.
+By default, `cloudera-deploy` expects to use the collections, roles, and libraries within the _execution environment_ container, that is, the `cldr-runner` image. Make sure you do _not_ have `ANSIBLE_COLLECTIONS_PATH` or `ANSIBLE_ROLES_PATH` set or `ansible-navigator` will pick up these environment variables and pass them to the running container. The underlying `ansible` application, like `ansible-playbook` will then pick up these environment variables and attempt to use them if set! This behavior is great if you want to use host-based collections, e.g. local development, but you need to ensure that you update the `ansible-navigator.yml` configuration file to mount the host collection and/or role directories into the execution environment container. See [Advanced Usage: Execution Modes](NAVIGATOR.md#advanced-usage-execution-modes) to learn more about these execution modes.
 
 ### `ansible-navigator` hangs when I run my playbook. What is going on?
 
-`ansible-navigator` does not handle user prompts when running in the `curses` UI, so actions in your playbook like:
+`ansible-navigator` does not handle user prompts when running in the `curses`, text-based UI , so actions in your playbook like:
 
 * Vault passwords
 * SSH passphrases
 * Debugger statements
 
-will not work out-of-the-box. You can enable `ansible-navigator` to run with prompts, but doing so will also disable the UI and instead run its operations using `stdout`.  Try adding:
+will not work out-of-the-box. You can enable `ansible-navigator` to run with prompts, but doing so will also disable the TUI and instead run its operations using `stdout`.
+
+Try adding:
 
 ```bash
 ansible-navigator run --enable-prompts ...
 ```
 
-to your execution.
+to your execution to allow `ansible-navigator` to receive your prompt input.
 
 ### How can I view a previous `ansible-navigator` run to debug an issue?
 
-Each example is configured to save execution runs in the project's `runs` directory. You can reload a run by using the `replay` command:
+`ansible-navigator` can be configured to save execution runs to a directory. You can reload a run by using the `replay` command:
 
 ```bash
-ansible-navigator replay runs/<playbook name>-<timestamp>.json
+ansible-navigator replay <playbook execution run file>.json
 ```
 
-Then you can use the UI to review the plays, tasks, and inventory for the previous run!
+Then you can use the TUI to review the plays, tasks, and inventory for the previous run!
+
+You can learn more about [replays](https://ansible.readthedocs.io/projects/navigator/subcommands/#ansible-navigator-subcommands) and their [configuration](https://ansible.readthedocs.io/projects/navigator/settings/#subcommand-replay) in the `ansible-navigator` documentation.
 
 ### How can I enable the playbook debugger?
 
