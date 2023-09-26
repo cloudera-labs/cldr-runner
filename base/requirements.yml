@@ -17,9 +17,6 @@
 # Galaxy requirements for base cldr-runner
 
 collections:
-  - name: https://github.com/cloudera-labs/cloudera.cluster.git
-    type: git
-    version: main
   - name: https://github.com/cloudera-labs/cloudera.exe.git
     type: git
     version: main
