@@ -164,9 +164,11 @@ The `cldr-runner` project can also be used to bootstrap a local development envi
 
 The `local_development.yml` playbook sets up a `cldr-runner`-like workspace for OSX and Ubuntu.  The playbook will clone the Cloudera collections and `cdpy` for local work, install the external Ansible dependencies, update the Python `venv`, and create a convenient setup script for future work.
 
-> [!NOTE] The cloned Cloudera collections and `cdpy` project use the `main` branches by default. Manipulating the branches is outside the scope of the `local_development.yml` playbook.
+> [!NOTE]
+> The cloned Cloudera collections and `cdpy` project use the `main` branches by default. Manipulating the branches is outside the scope of the `local_development.yml` playbook.
 
-> [!IMPORTANT] If you are using an M1 or M2 Macbook, enable the Rosetta within your terminal to ensure compatibility and prevent library incompatibilities between architectures. Go to `Finder > Applications` and then `Terminal > <right-click on your Terminal> > Get Info > Enable "Open using Rosetta"` (or whatever terminal application you use).
+> [!IMPORTANT]
+> If you are using an M1 or M2 Macbook, enable the Rosetta within your terminal to ensure compatibility and prevent library incompatibilities between architectures. Go to `Finder > Applications` and then `Terminal > <right-click on your Terminal> > Get Info > Enable "Open using Rosetta"` (or whatever application you want to use).
 
 Development in this manner starts with sourcing the setup script, activating the virtual environment, and then switching to and running `cldr-runner`-based applications, such as `ansible-navigator`-based [`cloudera-deploy` definitions](https://github.com/cloudera-labs/cloudera-deploy), using the development environment's collections and tools.
 
