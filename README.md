@@ -2,7 +2,7 @@
 
 [![Execution Environment images](https://github.com/cloudera-labs/cldr-runner/actions/workflows/publish_matrix_images.yml/badge.svg?branch=main)](https://github.com/cloudera-labs/cldr-runner/actions/workflows/publish_matrix_images.yml)
 
-`cldr-runner` is set of Ansible [Execution Environments](https://ansible.readthedocs.io/projects/builder/en/stable/#execution-environments) for running Cloudera playbooks, examples, and general automation for both **[Cloudera Data Platform (CDP) Public Cloud, Private Cloud, and Data Services](https://www.cloudera.com/products/cloudera-data-platform.html)**. These images are appropriate for use with [`ansible-navigator`](https://ansible.readthedocs.io/projects/navigator/) and [AWX](https://github.com/ansible/awx)/[Red Hat Ansible Automation Platform (AAP)](https://www.redhat.com/en/technologies/management/ansible).
+`cldr-runner` is set of Ansible [Execution Environments](https://ansible.readthedocs.io/projects/builder/en/stable/#execution-environments) for running Cloudera playbooks, examples, and general automation for [**Cloudera Data Platform (CDP) Public Cloud, Private Cloud, and Data Services**](https://www.cloudera.com/products/cloudera-data-platform.html). These images are appropriate for use with [`ansible-navigator`](https://ansible.readthedocs.io/projects/navigator/) and [AWX](https://github.com/ansible/awx)/[Red Hat Ansible Automation Platform (AAP)](https://www.redhat.com/en/technologies/management/ansible).
 
 Specifically, the project consists of `execution-environment.yml` configuration files and other supporting assets that power [`ansible-builder`](https://ansible.readthedocs.io/projects/builder/en/latest/). The configurations encapsulate the necessary Ansible collections and roles, Python libraries, and system applications to work with Cloudera's products and cloud providers. Moreover, the resulting images have the needed tooling for managing infrastructure if so requested.
 
@@ -29,9 +29,9 @@ Specifically, the project consists of `execution-environment.yml` configuration 
 
 If you want to see what we are working on or have pending, check out:
 
-*  the [Milestones](https://github.com/cloudera-labs/cldr-runner/milestones) and [active issues](https://github.com/cloudera-labs/cldr-runner/issues?q=is%3Aissue+is%3Aopen+milestone%3A*) to see our current activity,
+* the [Milestones](https://github.com/cloudera-labs/cldr-runner/milestones) and [active issues](https://github.com/cloudera-labs/cldr-runner/issues?q=is%3Aissue+is%3Aopen+milestone%3A*) to see our current activity,
 * the [issue backlog](https://github.com/cloudera-labs/cldr-runner/issues?q=is%3Aopen+is%3Aissue+no%3Amilestone) to see what work is pending or under consideration, and
-* read up on the [Ideas](https://github.com/cloudera-labs/cldr-runner/discussions/categories/ideas) we have in mind.
+* the [Ideas](https://github.com/cloudera-labs/cldr-runner/discussions/categories/ideas) discussion to see what we are considering..
 
 Are we missing something? Let us know by [creating a new issue](https://github.com/cloudera-labs/cldr-runner/issues/new) or [posting a new idea](https://github.com/cloudera-labs/cldr-runner/discussions/new?category=ideas)!
 
