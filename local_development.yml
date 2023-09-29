@@ -1,5 +1,6 @@
 ---
-# Copyright 2021 Cloudera, Inc. All Rights Reserved.
+
+# Copyright 2023 Cloudera, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -132,24 +133,11 @@
       failed_when: not (__osx_gcloud.msg is search("already installed") or __osx_gcloud.msg is search("Update done"))
       tags: system
 
-    # TODO Add azure-mgmt-netapp to python_azure.txt
-    - name: Set up the Python dependencies
-      ansible.builtin.pip:
-        requirements: "{{ item }}"
-        chdir: "./payload/deps"
-        state: present
-      loop:
-        - python_base.txt
-        - python_secondary.txt
-        - python_aws.txt
-        - python_gcp.txt
-        - python_azure.txt
-      tags: python
-
     - name: Clone the Cloudera automation collections
       ansible.builtin.git:
         repo: "{{ item.repo }}"
         dest: "{{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}/ansible_collections/cloudera/{{ item.collection}}"
+        version: devel
       loop:
         - repo: git@github.com:cloudera-labs/cloudera.cloud.git
           collection: cloud
@@ -179,12 +167,6 @@
       loop: "{{ collection_dependencies | dict2items | rejectattr('key', 'match', 'git+') | list }}"
       tags: collections
 
-    - name: Fix the azure-cli-core mismatch for ADAL-to-MSAL fiasco
-      ansible.builtin.pip:
-        name: azure-cli-core==2.30.0
-        state: present
-      tags: collections
-
     - name: Parse the Cloudera automation standalone role dependencies
       ansible.builtin.set_fact:
         role_dependencies: "{{ role_dependencies | default([]) | union([file]) }}"
@@ -204,6 +186,29 @@
       loop: "{{ role_dependencies }}"
       tags: roles
 
+    - name: Install Ansible Builder
+      ansible.builtin.pip:
+        name: ansible-builder==1.2.0
+        state: present
+      tags: python
+
+    - name: Determine the dependencies of the Ansible packages
+      ansible.builtin.command:
+        ansible-builder introspect --write-pip /tmp/final_python.txt --write-bindep /tmp/final_bindep.txt $ANSIBLE_COLLECTIONS_PATH
+      tags: python
+
+    - name: Install Python Dependencies
+      ansible.builtin.pip:
+        requirements: /tmp/final_python.txt
+        state: present
+      tags: python  
+
+    - name: Fix the azure-cli-core mismatch for ADAL-to-MSAL fiasco
+      ansible.builtin.pip:
+        name: azure-cli-core==2.30.0
+        state: present
+      tags: collections
+
     - name: Uninstall cdpy Python library
       ansible.builtin.pip:
         name: cdpy
@@ -214,6 +219,7 @@
       ansible.builtin.git:
         repo: "git@github.com:cloudera-labs/cdpy.git"
         dest: "{{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}/cdpy"
+        version: devel
       tags: cdpy
 
     - name: Install the local cdpy library
