@@ -1,6 +1,6 @@
 # cldr-runner - Ansible Execution Environments for Cloudera Data Platform (CDP)
 
-[![Execution Environment images](https://github.com/cloudera-labs/cldr-runner/actions/workflows/publish_matrix_images.yml/badge.svg?branch=main)](https://github.com/cloudera-labs/cldr-runner/actions/workflows/publish_matrix_images.yml)
+[![Execution Environment images](https://github.com/cloudera-labs/cldr-runner/actions/workflows/publish_matrix_images.yml/badge.svg)](https://github.com/cloudera-labs/cldr-runner/actions/workflows/publish_matrix_images.yml)
 
 `cldr-runner` is set of Ansible [Execution Environments](https://ansible.readthedocs.io/projects/builder/en/stable/#execution-environments) for running Cloudera playbooks, examples, and general automation for [**Cloudera Data Platform (CDP) Public Cloud, Private Cloud, and Data Services**](https://www.cloudera.com/products/cloudera-data-platform.html). These images are appropriate for use with [`ansible-navigator`](https://ansible.readthedocs.io/projects/navigator/) and [AWX](https://github.com/ansible/awx)/[Red Hat Ansible Automation Platform (AAP)](https://www.redhat.com/en/technologies/management/ansible).
 
