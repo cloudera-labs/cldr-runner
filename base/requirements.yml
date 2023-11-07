@@ -22,7 +22,7 @@ collections:
     version: v2.1.1
   - name: https://github.com/cloudera-labs/cloudera.cluster.git
     type: git
-    version: v4.1.0
+    version: v4.1.1
   - name: https://github.com/cloudera-labs/cloudera.exe.git
     type: git
     version: v2.1.0
