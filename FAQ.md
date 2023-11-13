@@ -54,6 +54,14 @@ The [playbook debugger](https://docs.ansible.com/ansible/latest/playbook_guide/p
 ANSIBLE_ENABLE_TASK_DEBUGGER=True ansible-navigator run --enable-prompts main.yml
 ```
 
+## How can I reference SSH keys when running in an Execution Environment container?
+
+The [`ansible-navigator` documentation](https://ansible.readthedocs.io/projects/navigator/faq/#ssh-keys) has instructions and guidance for using SSH keys within an execution environment, including how `ansible-navigator` will volume mount the SSH authentication socket dictated by `SSH_AUTH_SOCK` and set the same within the container. However, some host services are unable to mount sockets, so the best way to reference a SSH private key is to specify the `ansible_ssh_private_key_file` variable for a given host inventory. (See the note in the above documentation link.)
+
+For example, you might want to create a `group_vars/all.yml` or `group_vars/<inventory group name>.yml` file and specify the `ansible_ssh_private_key_file`.
+
+In any event, when specifying the `ansible_ssh_private_key_file`, keep in mind the path to the referenced key is in relation to the location of the key _within the execution environment_! (Again, see the above documentation link.)
+
 ## How to I configure SSH to avoid a "Failed to connect to new control master" error?
 
 When running connecting to a host via SSH while running `ansible-navigator`, in particular when you are working with Terraform inventory managed by the `cloud.terraform` inventory plugin, you might encounter the following error:
