@@ -19,13 +19,13 @@
 collections:
   - name: https://github.com/cloudera-labs/cloudera.cloud.git
     type: git
-    version: v2.2.0
+    version: v2.3.0
   - name: https://github.com/cloudera-labs/cloudera.cluster.git
     type: git
-    version: v4.2.0
+    version: v4.3.0
   - name: https://github.com/cloudera-labs/cloudera.exe.git
     type: git
-    version: v2.2.0
+    version: v2.3.0
   - name: community.mysql
     version: 3.1.0
   - name: community.postgresql
