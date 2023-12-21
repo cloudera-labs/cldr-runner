@@ -25,6 +25,9 @@ Setting up `ansible-navigator` is easy; you can spin up a new setup in **TWO** s
     pip install ansible-core ansible-navigator
    ```
 
+> [!WARNING]
+> On OSX, avoid using the stock Python executable with `ansible-navigator`; users report that the `curses` library in the stock installation is unable to run (throws a segfault). You might want to install a non-stock version of Python, such as using Homebrew or similar.
+
 # Usage
 
 `ansible-navigator` can be viewed as a wrapper around the core Ansible application, like `ansible-playbook`, `ansible-galaxy`, `ansible-doc`, etc. Read more about how to [configure](https://ansible.readthedocs.io/projects/navigator/settings/) your setup and your project execution as well as the [mapping](https://ansible.readthedocs.io/projects/navigator/subcommands/#mapping-ansible-navigator-commands-to-ansible-commands) of and [running](https://ansible.readthedocs.io/projects/navigator/subcommands/) of these subcommands.
