@@ -14,22 +14,21 @@
 
 #!/bin/bash
 
-# Sets up cldr-runner 'base' in an Ubuntu system
+# Sets up cldr-runner 'base' in a RHEL9 system
+
+# Run via the following command:
+#   source rhel9-init-base.sh
 
 # Prepare base system
-apt-get update
-apt-get install -y gnupg software-properties-common
+yum update
+yum install -y yum-utils
 
 # Install Terraform
-wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor > /usr/share/keyrings/hashicorp-archive-keyring.gpg
-gpg --no-default-keyring --keyring /usr/share/keyrings/hashicorp-archive-keyring.gpg --fingerprint
-echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
-apt update
-apt-get install -y terraform
+yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+yum -y install terraform
 
-# Prepare Python3.9 and pip
-apt install -y python3.9 python3.9-venv python3-pip 
-python3.9 -m venv cdp-navigator
+# Use existing Python3.9 and pip
+python3 -m venv cdp-navigator
 source cdp-navigator/bin/activate
 pip install --upgrade pip
 pip install wheel
