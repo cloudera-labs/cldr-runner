@@ -19,6 +19,14 @@
   connection: local
   gather_facts: yes
   tasks:
+    - name: Get input
+      ansible.builtin.pause:
+        prompt: "Enter clone method 'https' or 'git'"
+      register: clone_method
+      until: input.user_input | lower in ['https', 'git']
+      retries: 3
+      delay: 0
+
     - name: Confirm prerequisite environment variables are set
       ansible.builtin.assert:
         that: lookup('env', item.variable) | length > 0
@@ -139,12 +147,13 @@
         dest: "{{ lookup('env', 'ANSIBLE_COLLECTIONS_PATH') }}/ansible_collections/cloudera/{{ item.collection}}"
         version: devel
       loop:
-        - repo: git@github.com:cloudera-labs/cloudera.cloud.git
+        - repo: "{{ 'https://github.com/cloudera-labs/cloudera.cloud.git' if clone_method == 'HTTPS' else 'git@github.com:cloudera-labs/cloudera.cloud.git' }}"
           collection: cloud
-        - repo: git@github.com:cloudera-labs/cloudera.cluster.git
+        - repo: "{{ 'https://github.com/cloudera-labs/cloudera.cluster.git' if clone_method == 'HTTPS' else 'git@github.com:cloudera-labs/cloudera.cluster.git' }}"
           collection: cluster
-        - repo: git@github.com:cloudera-labs/cloudera.exe.git
+        - repo: "{{ 'https://github.com/cloudera-labs/cloudera.exe.git' if clone_method == 'HTTPS' else 'git@github.com:cloudera-labs/cloudera.exe.git' }}"
           collection: exe
+      when: clone_method in ['HTTPS', 'GIT']
       register: __cldr_collections
       tags:
         - collections
