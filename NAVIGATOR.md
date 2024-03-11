@@ -109,7 +109,12 @@ Arguably, this mode is the most complex, as it requires you to have installed al
 
 See the [Execution Environment configuration](https://ansible.readthedocs.io/projects/navigator/settings/#execution-environment) section for further details.
 
-This is a fairly common task then [running CI jobs](https://github.com/cloudera-labs/cloudera.cluster/blob/main/.github/workflows/validate_pr.yml) for individual collections. The [local development](README.md#local-development) instructions are designed to support this mode.
+This is a fairly common task then [running CI jobs](https://github.com/cloudera-labs/cloudera.cluster/blob/main/.github/workflows/validate_pr.yml) for individual collections. The [local development](README.md#local-development) instructions are designed to support this mode, and you can also bootstrap a host (such as a standalone VM) using following scripts:
+
+* `rhel9-init-base.sh` (RedHat 9)
+* `ubuntu20-init-base.sh` (Ubuntu 20.04 LTS)
+
+These scripts should be run or sourced to set up a `base` installation of `cldr-runner`.
 
 # Troubleshooting
 
