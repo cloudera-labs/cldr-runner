@@ -71,14 +71,14 @@ jobs:
           ansible-builder create --file ${{ inputs.PROFILE }}/execution-environment.yml
 
       - name: Upload Containerfile
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.PROFILE }}-Containerfile
           path: ./context/Containerfile
       
       - name: Download the base image
         if: ${{ inputs.PROFILE != 'base' }}
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: base-${{ steps.sha.outputs.sha-short }}
           path: /tmp
@@ -111,7 +111,7 @@ jobs:
 
       - name: Upload base image
         if: ${{ inputs.PROFILE == 'base' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: base-${{ steps.sha.outputs.sha-short }}
           path: /tmp/base-${{ steps.sha.outputs.sha-short }}.tar
