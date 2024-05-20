@@ -58,7 +58,6 @@ jobs:
             ghcr.io/${{ github.repository }}-${{ inputs.PROFILE }}
           flavor: |
             latest=auto
-            prefix=onlatest=true
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
