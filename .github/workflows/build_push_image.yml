@@ -45,14 +45,14 @@ jobs:
       registry-paths: ${{ steps.push-image.outputs.registry-paths }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install latest ansible-builder
         run: pip install ansible-builder
 
       - name: Construct image metadata
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: |
             ghcr.io/${{ github.repository }}-${{ inputs.PROFILE }}
