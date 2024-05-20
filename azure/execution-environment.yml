@@ -20,7 +20,7 @@ version: 3
 
 images:
   base_image:
-    name: ghcr.io/cloudera-labs/cldr-runner:base-latest
+    name: ghcr.io/cloudera-labs/cldr-runner-base:latest
 
 dependencies:
   galaxy: requirements.yml
@@ -29,13 +29,13 @@ dependencies:
       
 additional_build_steps:
   prepend_final:
-    - ARG BUILD_VER="azure-latest"
+    - ARG BUILD_VER="latest"
     - ARG BUILD_DATE="unknown"
     - ARG BUILD_REVISION="unknown"
     - ENV BUILD_VER="${BUILD_VER}"
     - ENV BUILD_DATE="${BUILD_DATE}"
     - ENV BUILD_REVISION="${BUILD_REVISION}"
-    - LABEL org.opencontainers.image.title="cldr-runner azure"
+    - LABEL org.opencontainers.image.title="cldr-runner-azure"
       org.opencontainers.image.description="Ansible Execution Environment with collections and dependencies for CDP Public Cloud, Private Cloud, and Data Services for Azure."
       org.opencontainers.image.created="${BUILD_DATE}"
       org.opencontainers.image.version="${BUILD_VER}"

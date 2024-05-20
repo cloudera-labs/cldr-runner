@@ -20,7 +20,7 @@ version: 3
 
 images:
   base_image:
-    name: ghcr.io/cloudera-labs/cldr-runner:base-latest
+    name: ghcr.io/cloudera-labs/cldr-runner-base:latest
 
 dependencies:
   galaxy: requirements.yml
@@ -36,13 +36,13 @@ additional_build_steps:
     - ADD _build/assets/google-cloud-cli.repo /etc/yum.repos.d/google-cloud-cli.repo
     - RUN yum install -y yum-utils && yum-config-manager --enable google-cloud-cli
   prepend_final:
-    - ARG BUILD_VER="gcp-latest"
+    - ARG BUILD_VER="latest"
     - ARG BUILD_DATE="unknown"
     - ARG BUILD_REVISION="unknown"
     - ENV BUILD_VER="${BUILD_VER}"
     - ENV BUILD_DATE="${BUILD_DATE}"
     - ENV BUILD_REVISION="${BUILD_REVISION}"
-    - LABEL org.opencontainers.image.title="cldr-runner gcp"
+    - LABEL org.opencontainers.image.title="cldr-runner-gcp"
       org.opencontainers.image.description="Ansible Execution Environment with collections and dependencies for CDP Public Cloud, Private Cloud, and Data Services for GCP."
       org.opencontainers.image.created="${BUILD_DATE}"
       org.opencontainers.image.version="${BUILD_VER}"
