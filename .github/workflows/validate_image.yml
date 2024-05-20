@@ -62,7 +62,7 @@ jobs:
       - name: Update container base image reference
         if: ${{ inputs.PROFILE != 'base' }}
         env:
-          REPLACEMENT_IMAGE: ${{ github.repository }}-base:${{ steps.sha.outputs.sha-short }}
+          REPLACEMENT_IMAGE: ${{ github.repository }}-base:sha-${{ steps.sha.outputs.sha-short }}
         run:
           sed -i 's|cloudera-labs/cldr-runner-base:latest|${{ env.REPLACEMENT_IMAGE }}|' ${{ inputs.PROFILE }}/execution-environment.yml
 
@@ -105,9 +105,9 @@ jobs:
       - name: Save the base image
         if: ${{ inputs.PROFILE == 'base' }}
         env:
-          BASE_IMAGE: base-${{ steps.sha.outputs.sha-short }}
+          BASE_IMAGE: ${{ steps.sha.outputs.sha-short }}
         run: |
-          podman save --output /tmp/${{ env.BASE_IMAGE }}.tar ${{ github.repository }}:${{ env.BASE_IMAGE }}
+          podman save --output /tmp/base-${{ env.BASE_IMAGE }}.tar ${{ github.repository }}-base:sha-${{ env.BASE_IMAGE }}
 
       - name: Upload base image
         if: ${{ inputs.PROFILE == 'base' }}
