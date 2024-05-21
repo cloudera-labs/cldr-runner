@@ -1,6 +1,6 @@
 ---
 
-# Copyright 2023 Cloudera, Inc. All Rights Reserved.
+# Copyright 2024 Cloudera, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,11 +18,11 @@
 
 collections:
   - name: cloudera.cloud
-    version: 2.3.1
+    version: 2.4.0
   - name: cloudera.cluster
-    version: 4.3.1
+    version: 4.4.0
   - name: cloudera.exe
-    version: 2.3.1
+    version: 2.4.0
   - name: community.mysql
     version: 3.1.0
   - name: community.postgresql
