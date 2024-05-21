@@ -33,7 +33,7 @@ additional_build_steps:
   prepend_builder:
     - RUN yum install -y yum-utils && yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo  
   prepend_final:
-    - ARG BUILD_VER="base-latest"
+    - ARG BUILD_VER="latest"
     - ARG BUILD_DATE="unknown"
     - ARG BUILD_REVISION="unknown"
     - ENV BUILD_VER="${BUILD_VER}"
@@ -45,7 +45,7 @@ additional_build_steps:
       org.opencontainers.image.url="https://github.com/cloudera-labs/cldr-runner/blob/main/README.md"
       org.opencontainers.image.source="https://github.com/cloudera-labs/cldr-runner.git"
       org.opencontainers.image.licenses=Apache-2.0
-      org.opencontainers.image.title="cldr-runner base"
+      org.opencontainers.image.title="cldr-runner-base"
       org.opencontainers.image.description="Ansible Execution Environment with collections and dependencies for CDP Public Cloud, Private Cloud, and Data Services."
       org.opencontainers.image.created="${BUILD_DATE}"
       org.opencontainers.image.version="${BUILD_VER}"

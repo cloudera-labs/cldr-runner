@@ -31,7 +31,7 @@ on:
         value: ${{ jobs.build-push.outputs.registry-paths }}
       image-sha:
         description: 'the SHA-tagged image path'
-        value: ghcr.io/${{ github.repository }}:sha-${{ jobs.build-push.outputs.sha-short }}
+        value: ghcr.io/${{ github.repository }}-${{ inputs.PROFILE }}:sha-${{ jobs.build-push.outputs.sha-short }}
 
 permissions:
   contents: read
@@ -45,26 +45,25 @@ jobs:
       registry-paths: ${{ steps.push-image.outputs.registry-paths }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install latest ansible-builder
         run: pip install ansible-builder
 
       - name: Construct image metadata
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: |
-            ghcr.io/${{ github.repository }}
+            ghcr.io/${{ github.repository }}-${{ inputs.PROFILE }}
           flavor: |
             latest=auto
-            prefix=${{ inputs.PROFILE }}-,onlatest=true
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=ref,event=branch
             type=ref,event=pr
-            type=sha,prefix=${{ inputs.PROFILE }}-
+            type=sha
 
       - name: Construct short SHA
         id: sha
@@ -73,9 +72,9 @@ jobs:
       - name: Update container base image reference
         if: ${{ inputs.PROFILE != 'base' }}
         env:
-          REPLACEMENT_IMAGE: ${{ github.repository }}:base-${{ steps.sha.outputs.sha-short }}
+          REPLACEMENT_IMAGE: ${{ github.repository }}-base:sha-${{ steps.sha.outputs.sha-short }}
         run:
-          sed -i 's|cloudera-labs/cldr-runner:base-latest|${{ env.REPLACEMENT_IMAGE }}|' ${{ inputs.PROFILE }}/execution-environment.yml
+          sed -i 's|cloudera-labs/cldr-runner-base:latest|${{ env.REPLACEMENT_IMAGE }}|' ${{ inputs.PROFILE }}/execution-environment.yml
 
       - name: Create builder context
         run: |

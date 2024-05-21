@@ -6,7 +6,7 @@
 
 Specifically, the project consists of `execution-environment.yml` configuration files and other supporting assets that power [`ansible-builder`](https://ansible.readthedocs.io/projects/builder/en/latest/). The configurations encapsulate the necessary Ansible collections and roles, Python libraries, and system applications to work with Cloudera's products and cloud providers. Moreover, the resulting images have the needed tooling for managing infrastructure if so requested.
 
-`cldr-runner` builds several variations:
+`cldr-runner` builds several profiles:
 
 | Tag | Description |
 |-----|-------------|
@@ -15,6 +15,8 @@ Specifically, the project consists of `execution-environment.yml` configuration 
 | [azure](azure/execution-environment.yml) | `base` plus Azure-specific collections and dependencies, including the `az` CLI |
 | [gcp](gcp/execution-environment.yml) | `base` plus GCP-specific collections and dependencies, including the `gcloud` CLI |
 | [full](full/execution-environment.yml) | All of the above, plus additional CLI tools for in-container usage, e.g. `git`, `vim`, `nano`, `tree`, `kubectl` |
+
+Each image is tagged `cloudera-labs/cldr-runner-<profile>:<version>`.
 
 # Quickstart
 
@@ -52,7 +54,7 @@ ansible-navigator:
   execution-environment:
     container-engine: docker
     enabled: True
-    image: ghcr.io/cloudera-labs/cldr-runner:aws-latest
+    image: ghcr.io/cloudera-labs/cldr-runner-aws:latest
     pull:
       policy: missing
 ```
@@ -78,7 +80,7 @@ Once defined, the EE can be used by Job Templates, Container Groups, etc.
 You can run the container directly in `docker` (or `podman`):
 
 ```bash
-docker run -it ghcr.io/cloudera-labs/cldr-runner:aws-latest /bin/bash
+docker run -it ghcr.io/cloudera-labs/cldr-runner-aws:latest /bin/bash
 ```
 
 Take care to assemble and mount the needed directories other supporting assets; the image is based on [`ansible-runner`](https://ansible.readthedocs.io/projects/runner/en/stable/) (as are all Execution Environments) and runs as such.
@@ -121,7 +123,7 @@ version: 3
 
 images:
   base_image:
-    name: ghcr.io/cloudera-labs/cldr-runner:aws-latest
+    name: ghcr.io/cloudera-labs/cldr-runner-aws:latest
 
 dependencies:
   galaxy:
@@ -209,7 +211,7 @@ Follow these steps to set up a local environment:
 
 # License and Copyright
 
-Copyright 2023, Cloudera, Inc.
+Copyright 2024, Cloudera, Inc.
 
 ```
 Licensed under the Apache License, Version 2.0 (the "License");
