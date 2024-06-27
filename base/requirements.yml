@@ -18,7 +18,7 @@
 
 collections:
   - name: cloudera.cloud
-    version: 2.4.0
+    version: 2.5.1
   - name: cloudera.cluster
     version: 4.4.0
   - name: cloudera.exe
