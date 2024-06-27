@@ -1,18 +1,18 @@
 # Frequently Asked Questions
 
-Be sure to check out the [Discussions > Help](https://github.com/cloudera-labs/cldr-runner/discussions/categories/help) category for the latest answers. 
+Be sure to check out the [Discussions > Help](https://github.com/cloudera-labs/cldr-runner/discussions/categories/help) category for the latest answers.
 
 # `ansible-navigator` FAQ
 
 ## How do I add _extra variables_ and tags to `ansible-navigator`?
 
-If you want to run a playbook with a given tag, e.g. `-t infra`, then simply add it as a parameter to the `ansible-navigator` commandline. For example, `ansible-navigator run playbook.yml -t infra`. 
+If you want to run a playbook with a given tag, e.g. `-t infra`, then simply add it as a parameter to the `ansible-navigator` commandline. For example, `ansible-navigator run playbook.yml -t infra`.
 
 Like tags, so you can pass _extra variables_ to `ansible-navigator` and the underlying Ansible command. For example, `ansible-navigator run playbook.yml -e @some_config.yml -e some_var=yes`.
 
 ## How do I tell `ansible-navigator` where to find collections and roles?
 
-By default, `cloudera-deploy` expects to use the collections, roles, and libraries within the _execution environment_ container, that is, the `cldr-runner` image. Make sure you do _not_ have `ANSIBLE_COLLECTIONS_PATH` or `ANSIBLE_ROLES_PATH` set or `ansible-navigator` will pick up these environment variables and pass them to the running container. The underlying `ansible` application, like `ansible-playbook` will then pick up these environment variables and attempt to use them if set! 
+By default, `cloudera-deploy` expects to use the collections, roles, and libraries within the _execution environment_ container, that is, the `cldr-runner` image. Make sure you do _not_ have `ANSIBLE_COLLECTIONS_PATH` or `ANSIBLE_ROLES_PATH` set or `ansible-navigator` will pick up these environment variables and pass them to the running container. The underlying `ansible` application, like `ansible-playbook` will then pick up these environment variables and attempt to use them if set!
 
 This behavior is great if you want to use host-based collections, e.g. local development, but you need to ensure that you update the `ansible-navigator.yml` configuration file to mount the host collection and/or role directories into the execution environment container. See [Advanced Usage: Execution Modes](NAVIGATOR.md#advanced-usage-execution-modes) to learn more about these execution modes.
 

@@ -57,7 +57,7 @@
             - https://apt.releases.hashicorp.com/gpg # for terraform
             - https://packages.cloud.google.com/apt/doc/apt-key.gpg # for kubectl & google-cloud-sdk
             - https://packages.microsoft.com/keys/microsoft.asc # for azure-cli
-        
+
         - name: Add package repositories
           become: yes
           ansible.builtin.apt_repository:
@@ -89,8 +89,8 @@
               - google-cloud-sdk
               - azure-cli
             state: present
-        
-        - name: Install commands via download 
+
+        - name: Install commands via download
           block:
             # Determine if the executable already exists in path
             - name: Check if commands are already available
@@ -201,7 +201,7 @@
       ansible.builtin.pip:
         requirements: /tmp/final_python.txt
         state: present
-      tags: python  
+      tags: python
 
     - name: Fix the azure-cli-core mismatch for ADAL-to-MSAL fiasco
       ansible.builtin.pip:

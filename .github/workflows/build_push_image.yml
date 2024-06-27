@@ -79,7 +79,7 @@ jobs:
       - name: Create builder context
         run: |
           ansible-builder create --file ${{ inputs.PROFILE }}/execution-environment.yml
-      
+
       - name: Build image from builder context
         uses: redhat-actions/buildah-build@v2
         with:
