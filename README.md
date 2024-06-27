@@ -45,7 +45,7 @@ For more information on how to get involved with the `cldr-runner` project, head
 
 You can run Ansible within `cldr-runner` Execution Environments a couple of different ways. Here are the most common:
 
-## `ansible-navigator` 
+## `ansible-navigator`
 
 Using a `cldr-runner` image in the [`ansible-navigator` application](https://ansible.readthedocs.io/projects/navigator/) as the designated [Execution Environment](https://docs.ansible.com/ansible/devel/getting_started_ee/index.html) is straightforward. Update your `ansible-navigator.yml` configuration file to enable the image:
 
@@ -62,7 +62,7 @@ ansible-navigator:
 Once defined, you can run your Ansible activities within the resulting `cldr-runner` container, e.g. `ansible-navigator run your_playbook.yml`. (You can specify the image via the `ansible-navigator` CLI; set `--eei` or `--execution-environment-image`.)
 
 > [!NOTE]
-> If you want to "drop into" the container directly, i.e. run a shell within the container, run `ansible-navigator exec -- /bin/bash` and all the mounts, environment variables, etc. are handled for you!! Now from the shell, you can still run `ansible-playbook` and all other Ansible applications. 
+> If you want to "drop into" the container directly, i.e. run a shell within the container, run `ansible-navigator exec -- /bin/bash` and all the mounts, environment variables, etc. are handled for you!! Now from the shell, you can still run `ansible-playbook` and all other Ansible applications.
 
 ## AWX/AAP
 
@@ -99,7 +99,7 @@ python -m venv ~/location/of/venv; source ~/location/of/venv/bin/activate; pip i
 Then change into the directory of the `cldr-runner` variation you need to build and run:
 
 ```bash
-ansible-builder build --prune-images --squash all --build-arg BUILD_VER=<your version> --build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") --tag <your tag> 
+ansible-builder build --prune-images --squash all --build-arg BUILD_VER=<your version> --build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") --tag <your tag>
 ```
 
 You may want to update the variation's `execution-environment.yml` configuration file to use a different base image, say a local image, or build the `base` image before constructing CSP or `full` image. You can make this change in the following section of the configuration file:
@@ -162,7 +162,7 @@ ansible-navigator:
 
 # Local Development
 
-The `cldr-runner` project can also be used to bootstrap a local development environment on the native host environment (as opposed to an Execution Environment image).  This option is more involved, but can avoid issues with Docker, such as mount latencies and SSH agent forwarding, and improve overall Ansible collection development. 
+The `cldr-runner` project can also be used to bootstrap a local development environment on the native host environment (as opposed to an Execution Environment image).  This option is more involved, but can avoid issues with Docker, such as mount latencies and SSH agent forwarding, and improve overall Ansible collection development.
 
 The `local_development.yml` playbook sets up a `cldr-runner`-like workspace for OSX and Ubuntu.  The playbook will clone the Cloudera collections and `cdpy` for local work, install the external Ansible dependencies, update the Python `venv`, and create a convenient setup script for future work.
 

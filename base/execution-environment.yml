@@ -68,4 +68,4 @@ additional_build_steps:
   append_final:
     - ADD _build/assets/bashrc /runner/.bashrc
     - RUN /usr/bin/python3 -m pip cache purge || echo "No Pip cache to purge"
-    - RUN dnf clean all -y && rm -rf /var/cache/yum /var/cache/dnf /tmp/src    
+    - RUN dnf clean all -y && rm -rf /var/cache/yum /var/cache/dnf /tmp/src

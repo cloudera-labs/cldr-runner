@@ -49,4 +49,3 @@ additional_build_steps:
       org.opencontainers.image.revision="${BUILD_REVISION}"
     - ADD _build/assets/google-cloud-cli.repo /etc/yum.repos.d/google-cloud-cli.repo
     - RUN yum install -y yum-utils && yum-config-manager --enable google-cloud-cli
-   

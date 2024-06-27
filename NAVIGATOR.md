@@ -86,7 +86,7 @@ Typically, this collections directory is a mix of Git-cloned and downloaded coll
 
 See the [Placement of Ansible collections](https://ansible.readthedocs.io/projects/navigator/faq/#placement-of-ansible-collections) section for further details.
 
-The [local development](README.md#local-development) instructions are designed to support this mode. 
+The [local development](README.md#local-development) instructions are designed to support this mode.
 
 ## Platform Mode
 
