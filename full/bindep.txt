@@ -21,7 +21,6 @@ tree
 
 # AWS
 unzip
-curl
 
 # GCP
 google-cloud-cli
