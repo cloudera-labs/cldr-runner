@@ -15,4 +15,3 @@
 # System dependencies for AWS cldr-runner
 
 unzip
-curl

@@ -18,6 +18,6 @@
 
 collections:
   - name: azure.azcollection
-    version: 1.11.0
+    version: 1.14.0
   - name: netapp.azure
     version: 21.10.0

@@ -18,22 +18,33 @@
 
 version: 3
 
+images:
+  base_image:
+    name: quay.io/centos/centos:stream9
+
 dependencies:
   ansible_core:
     package_pip: ansible-core~=2.12.10
+  ansible_runner:
+    package_pip: ansible-runner~=2.1.4
   galaxy: requirements.yml
   python: requirements.txt
   system: bindep.txt
+  python_interpreter:
+    package_system: "python39"
 
 additional_build_files:
   - src: bashrc
     dest: assets
 
 additional_build_steps:
+  prepend_base:
+    - RUN yum install -y git
+    - RUN dnf clean all -y && rm -rf /var/cache/yum /var/cache/dnf /tmp/src
   prepend_builder:
-    - RUN yum install -y yum-utils && yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo  
+    - RUN yum install -y yum-utils && yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
   prepend_final:
-    - ARG BUILD_VER="base-latest"
+    - ARG BUILD_VER="latest"
     - ARG BUILD_DATE="unknown"
     - ARG BUILD_REVISION="unknown"
     - ENV BUILD_VER="${BUILD_VER}"
@@ -45,7 +56,7 @@ additional_build_steps:
       org.opencontainers.image.url="https://github.com/cloudera-labs/cldr-runner/blob/main/README.md"
       org.opencontainers.image.source="https://github.com/cloudera-labs/cldr-runner.git"
       org.opencontainers.image.licenses=Apache-2.0
-      org.opencontainers.image.title="cldr-runner base"
+      org.opencontainers.image.title="cldr-runner-base"
       org.opencontainers.image.description="Ansible Execution Environment with collections and dependencies for CDP Public Cloud, Private Cloud, and Data Services."
       org.opencontainers.image.created="${BUILD_DATE}"
       org.opencontainers.image.version="${BUILD_VER}"
@@ -56,6 +67,5 @@ additional_build_steps:
     - RUN dnf clean all -y && rm -rf /var/cache/yum /var/cache/dnf /tmp/src
   append_final:
     - ADD _build/assets/bashrc /runner/.bashrc
-    - RUN alternatives --set python /usr/bin/python3
     - RUN /usr/bin/python3 -m pip cache purge || echo "No Pip cache to purge"
-    - RUN dnf clean all -y && rm -rf /var/cache/yum /var/cache/dnf /tmp/src    
+    - RUN dnf clean all -y && rm -rf /var/cache/yum /var/cache/dnf /tmp/src
