@@ -22,7 +22,7 @@ collections:
   - name: cloudera.cluster
     version: 4.4.0
   - name: cloudera.exe
-    version: 2.4.0
+    version: 2.4.1
   - name: community.mysql
     version: 3.1.0
   - name: community.postgresql
