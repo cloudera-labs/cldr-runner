@@ -24,9 +24,9 @@ collections:
   - name: cloudera.exe
     version: 2.4.1
   - name: community.mysql
-    version: 3.1.0
+    version: 3.8.0
   - name: community.postgresql
-    version: 1.6.1
+    version: 3.3.0
   - name: freeipa.ansible_freeipa
     version: 1.11.1
   - name: cloud.terraform
@@ -34,6 +34,6 @@ collections:
 
 roles:
   - name: geerlingguy.postgresql
-    version: 2.2.0
-  - src: https://github.com/dbeech/ansible-role-mysql
+    version: 3.5.0
+  - src: https://github.com/clevesque/ansible-role-mysql
     version: master
