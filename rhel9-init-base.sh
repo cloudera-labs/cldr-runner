@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2024 Cloudera, Inc.
+# Copyright 2025 Cloudera, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,15 +14,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#
 # Sets up cldr-runner 'base' in a RHEL9 system
-
+#
 # Run via the following command:
 #   source rhel9-init-base.sh
+#
+# Or supply a Github project URl to download and use for the requirements.yml
+#   source rhel9-init-base.sh https://github.com/some-repo/some-project.git
+#
 # Or use as a cloud user data script
+#
+
+# Check for execution mode (source only)
+[[ "${BASH_SOURCE[0]}" == "${0}" ]] && echo "Please source '$(basename -- ${0})'. Do not execute directly." && exit 1
 
 # Prepare base system
 yum update -y
 yum install -y yum-utils
+
+# Install git
+yum -y install git
 
 # Install Terraform
 yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
@@ -49,7 +61,7 @@ fi
 source /opt/cdp-navigator/bin/activate
 pip install --upgrade pip
 pip install wheel
-pip install ansible-core~=2.12.10 ansible-navigator
+pip install ansible-core<2.17 ansible-navigator
 cat <<EOF >> /etc/profile.d/cdp-navigator.sh
 
 echo "======================================================================="
@@ -60,8 +72,16 @@ echo "======================================================================="
 EOF
 
 # Install the cldr-runner requirements
-git clone --depth 1 https://github.com/cloudera-labs/cldr-runner.git /opt/cldr-runner
-pushd /opt/cldr-runner/base
+
+if [ $# -eq 0 ]; then
+  echo "Initializing cldr-runner/base"
+  git clone --depth 1 https://github.com/cloudera-labs/cldr-runner.git /opt/cldr-runner
+  pushd /opt/cldr-runner/base
+else
+  echo "Initializing $1"
+  git clone --depth 1 "$1" /opt/cldr-runner
+  pushd /opt/cldr-runner
+fi
 
 mkdir -p /usr/share/ansible/collections /usr/share/ansible/roles
 ansible-galaxy collection install -r requirements.yml -p /usr/share/ansible/collections
