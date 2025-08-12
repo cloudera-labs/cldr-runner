@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2024 Cloudera, Inc.
+# Copyright 2025 Cloudera, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,15 +14,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+#
 # Sets up cldr-runner 'base' in an Ubuntu system
-
+#
 # Run via the following command with elevated privileges, e.g. sudo:
 #   source ubuntu-init-base.sh
+#
+# Or supply a Github project URl to download and use for the requirements.yml
+#   source ubuntu-init-base.sh https://github.com/some-repo/some-project.git
+#
 # Or use as a cloud user data script
+#
+
+# Check for execution mode (source only)
+[[ "${BASH_SOURCE[0]}" == "${0}" ]] && echo "Please source '$(basename -- ${0})'. Do not execute directly." && exit 1
 
 # Prepare base system
 apt-get update -y
 apt-get install -y gnupg software-properties-common wget
+
+# Install git
+apt-get install -y git
 
 # Install Terraform
 wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor > /usr/share/keyrings/hashicorp-archive-keyring.gpg
@@ -34,6 +46,11 @@ apt-get install -y terraform
 # Prepare Python3.9 or greater and pip
 OS_RELEASE=$(lsb_release -rs)
 case "${OS_RELEASE}" in
+  "24.04" )
+    echo "Using default $(python3 --version)"
+    apt install -y python3-venv python3-pip
+    PYTHON_BIN=python3
+    ;;
   "22.04" )
     echo "Using default $(python3 --version)"
     apt install -y python3-venv python3-pip
@@ -68,7 +85,7 @@ fi
 source /opt/cdp-navigator/bin/activate
 pip install --upgrade pip
 pip install wheel
-pip install ansible-core~=2.12.10 ansible-navigator
+pip install "ansible-core<2.17" ansible-navigator
 cat <<EOF >> /etc/bash.bashrc
 
 echo "======================================================================="
@@ -79,8 +96,15 @@ echo "======================================================================="
 EOF
 
 # Install the cldr-runner requirements
-git clone --depth 1 https://github.com/cloudera-labs/cldr-runner.git /opt/cldr-runner
-pushd /opt/cldr-runner/base
+if [ $# -eq 0 ]; then
+  echo "Initializing cldr-runner/base"
+  git clone --depth 1 https://github.com/cloudera-labs/cldr-runner.git /opt/cldr-runner
+  pushd /opt/cldr-runner/base
+else
+  echo "Initializing $1"
+  git clone --depth 1 "$1" /opt/cldr-runner
+  pushd /opt/cldr-runner
+fi
 
 mkdir -p /usr/share/ansible/collections /usr/share/ansible/roles
 ansible-galaxy collection install -r requirements.yml -p /usr/share/ansible/collections
