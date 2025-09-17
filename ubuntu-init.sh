@@ -15,13 +15,13 @@
 # limitations under the License.
 
 #
-# Sets up working Ansible controller on a RHEL9 system and readies an Ansible project
+# Sets up working Ansible controller on an Ubuntu system and readies an Ansible project
 #
-# Run via the following command:
-#  ./rhel9-init.sh
+# Run via the following command with elevated privileges, e.g. sudo:
+#   ./ubuntu-init.sh
 #
 # Or supply a Github project URl to download and use for the requirements.yml
-#   ./rhel9-init.sh https://github.com/some-repo/some-project.git [<some/branch>]
+#   ./ubuntu-init.sh https://github.com/some-repo/some-project.git [<some/branch>]
 #
 
 # Check for execution mode (source only)
@@ -62,27 +62,51 @@ clone_repo() {
 }
 
 echo -e "===== Prepare base system =====\n"
-yum update -y
-yum install -y yum-utils gcc python3-devel
+apt-get update -y
+apt-get install -y gnupg software-properties-common wget
 
 # Install git
-yum -y install git
+apt-get install -y git
 
 echo -e "\n===== Provision Terraform =====\n"
-yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
-yum -y install terraform
+wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor > /usr/share/keyrings/hashicorp-archive-keyring.gpg
+gpg --no-default-keyring --keyring /usr/share/keyrings/hashicorp-archive-keyring.gpg --fingerprint
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/hashicorp.list
+apt update -y
+apt-get install -y terraform
 
-# Use existing Python3.9 and pip
-OS_RELEASE=$(cat /etc/os-release | grep REDHAT_SUPPORT_PRODUCT_VERSION | awk -F= '{ print $2 }')
+# Prepare Python3.9 or greater and pip
+OS_RELEASE=$(lsb_release -rs)
+case "${OS_RELEASE}" in
+  "24.04" )
+    echo "Using default $(python3 --version)"
+    apt install -y python3-venv python3-pip
+    PYTHON_BIN=python3
+    ;;
+  "22.04" )
+    echo "Using default $(python3 --version)"
+    apt install -y python3-venv python3-pip
+    PYTHON_BIN=python3
+    ;;
+  "20.04" )
+    echo "Installing Python3.9"
+    apt install -y python3.9 python3.9-venv python3-pip
+    PYTHON_BIN=python3.9
+    ;;
+  * )
+    echo "Unsupported Ubuntu version: ${OS_RELEASE}"
+    exit 1
+    ;;
+esac
 
 echo -e "\n===== Provision Python virtual environment =====\n"
-python3 -m venv /opt/cdp-navigator
+${PYTHON_BIN} -m venv /opt/cdp-navigator
 
 # Set the permissions on the shared environment
 if getent group "${WORKSPACE_GROUP}" > /dev/null; then
   echo "Group '${WORKSPACE_GROUP}' exists."
 else
-  groupadd "${WORKSPACE_GROUP}"
+  addgroup "${WORKSPACE_GROUP}"
 fi
 chgrp -R "${WORKSPACE_GROUP}" /opt/cdp-navigator
 chmod -R 2774 /opt/cdp-navigator
@@ -122,14 +146,19 @@ else
 fi
 
 mkdir -p /usr/share/ansible/collections /usr/share/ansible/roles
-ansible-galaxy collection install -r requirements.yml -p /usr/share/ansible/collections --force
-ansible-galaxy role install -r requirements.yml -p /usr/share/ansible/roles --force
+ansible-galaxy collection install -r requirements.yml -p /usr/share/ansible/collections
+ansible-galaxy role install -r requirements.yml -p /usr/share/ansible/roles
 
 popd > /dev/null
 
 ansible-builder introspect --write-pip final_python.txt --write-bindep final_bindep.txt /usr/share/ansible/collections
-[[ -f final_python.txt ]] && pip install -r final_python.txt || echo "No Python dependencies found."
-[[ -f final_bindep.txt ]] && bindep --file final_bindep.txt || echo "No system dependencies found."
+
+# Install with extra flag to handle errors with PyYAML and cython_sources
+if [[ "${OS_RELEASE}" == "22.04" ]]; then
+  [[ -f final_python.txt ]] && pip install -r final_python.txt --no-build-isolation || echo "No Python dependencies found." ;
+else
+  [[ -f final_bindep.txt ]] && bindep --file final_bindep.txt || echo "No system dependencies found." ;
+fi
 
 echo -e "\n===== Provision profile instructions and alias =====\n"
 cat <<EOF > /etc/profile.d/cdp-navigator.sh
