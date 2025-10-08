@@ -39,6 +39,7 @@ permissions:
 
 jobs:
   build-push:
+    if: ${{ github.repository == 'cloudera-labs/cldr-runner' }}
     runs-on: ubuntu-latest
     outputs:
       sha-short: ${{ steps.sha.outputs.sha-short }}
@@ -90,6 +91,7 @@ jobs:
             BUILD_VER=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
             BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
             BUILD_REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
+          platforms: linux/amd64, linux/arm64
           image: ${{ github.repository }}
           tags: ${{ steps.meta.outputs.tags }}
 
