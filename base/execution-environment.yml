@@ -24,9 +24,9 @@ images:
 
 dependencies:
   ansible_core:
-    package_pip: ansible-core~=2.12.10
+    package_pip: ansible-core~=2.15.0 # Limited by default py39 on CentOS 9
   ansible_runner:
-    package_pip: ansible-runner~=2.1.4
+    package_pip: ansible-runner~=2.4.0
   galaxy: requirements.yml
   python: requirements.txt
   system: bindep.txt
