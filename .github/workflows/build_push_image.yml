@@ -80,6 +80,11 @@ jobs:
         run: |
           ansible-builder create --file ${{ inputs.PROFILE }}/execution-environment.yml
 
+      - name: Set up QEMU for multi-arch builds
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
+
       - name: Build image from builder context
         uses: redhat-actions/buildah-build@v2
         with:
