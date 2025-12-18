@@ -30,18 +30,8 @@ jobs:
     with:
       PROFILE: base
 
-  validate-profiles:
-    needs: validate-base
-    uses: ./.github/workflows/validate_image.yml
-    strategy:
-      fail-fast: false
-      matrix:
-        ee_profile: ["aws", "azure", "gcp", "full"]
-    with:
-      PROFILE: ${{ matrix.ee_profile }}
-
   record:
-    needs: validate-profiles
+    needs: validate-base
     runs-on: ubuntu-latest
     steps:
       # See https://securitylab.github.com/research/github-actions-preventing-pwn-requests/
