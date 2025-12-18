@@ -17,29 +17,9 @@
 # Galaxy requirements for base cldr-runner
 
 collections:
-  - name: https://github.com/cloudera-labs/cloudera.cluster
-    type: git
-    version: main
-  - name: https://github.com/cloudera-labs/cloudera.cloud
-    type: git
-    version: main
-  - name: https://github.com/cloudera-labs/cloudera.exe
-    type: git
-    version: main
-  - name: community.aws
-    version: 9.3.0
-  - name: ansible.posix
-    version: 1.6.1
-  - name: ansible.utils
-    version: 5.1.2
-  - name: community.crypto
-    version: 2.22.1
-  - name: community.general
-    version: 11.1.2
-  - name: community.postgresql
-    version: 3.7.0
-  - name: freeipa.ansible_freeipa
-    version: 1.15.1
-roles:
-  - name: geerlingguy.postgresql
-    version: 3.5.2
+  - name: cloudera.cluster
+    version: 5.0.0
+  - name: cloudera.cloud
+    version: 3.1.0
+  - name: cloudera.exe
+    version: 3.2.0
