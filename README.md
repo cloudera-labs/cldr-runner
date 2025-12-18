@@ -2,19 +2,15 @@
 
 [![Execution Environment images](https://github.com/cloudera-labs/cldr-runner/actions/workflows/publish_matrix_images.yml/badge.svg)](https://github.com/cloudera-labs/cldr-runner/actions/workflows/publish_matrix_images.yml)
 
-`cldr-runner` is set of Ansible [Execution Environments](https://ansible.readthedocs.io/projects/builder/en/stable/#execution-environments) for running Cloudera playbooks, examples, and general automation for [**Cloudera Data Platform (CDP) Public Cloud, Private Cloud, and Data Services**](https://www.cloudera.com/products/cloudera-data-platform.html). These images are appropriate for use with [`ansible-navigator`](https://ansible.readthedocs.io/projects/navigator/) and [AWX](https://github.com/ansible/awx)/[Red Hat Ansible Automation Platform (AAP)](https://www.redhat.com/en/technologies/management/ansible).
+`cldr-runner` is a Ansible [Execution Environment](https://ansible.readthedocs.io/projects/builder/en/stable/#execution-environments) for running Cloudera playbooks, examples, and general automation for [**Cloudera Data Platform (CDP) Public Cloud, Private Cloud, and Data Services**](https://www.cloudera.com/products/cloudera-data-platform.html). The images are appropriate for use with [`ansible-navigator`](https://ansible.readthedocs.io/projects/navigator/) and [AWX](https://github.com/ansible/awx)/[Red Hat Ansible Automation Platform (AAP)](https://www.redhat.com/en/technologies/management/ansible).
 
 Specifically, the project consists of `execution-environment.yml` configuration files and other supporting assets that power [`ansible-builder`](https://ansible.readthedocs.io/projects/builder/en/latest/). The configurations encapsulate the necessary Ansible collections and roles, Python libraries, and system applications to work with Cloudera's products and cloud providers. Moreover, the resulting images have the needed tooling for managing infrastructure if so requested.
 
-`cldr-runner` builds several profiles:
+`cldr-runner` builds the following profiles:
 
 | Tag | Description |
 |-----|-------------|
 | [base](base/execution-environment.yml) | Core Ansible, collections, and dependencies including Terraform |
-| [aws](aws/execution-environment.yml) | `base` plus AWS-specific collections and dependencies, including the `aws` CLI |
-| [azure](azure/execution-environment.yml) | `base` plus Azure-specific collections and dependencies, including the `az` CLI |
-| [gcp](gcp/execution-environment.yml) | `base` plus GCP-specific collections and dependencies, including the `gcloud` CLI |
-| [full](full/execution-environment.yml) | All of the above, plus additional CLI tools for in-container usage, e.g. `git`, `vim`, `nano`, `tree`, `kubectl` |
 
 Each image is tagged `cloudera-labs/cldr-runner-<profile>:<version>`.
 
@@ -54,7 +50,7 @@ ansible-navigator:
   execution-environment:
     container-engine: docker
     enabled: True
-    image: ghcr.io/cloudera-labs/cldr-runner-aws:latest
+    image: ghcr.io/cloudera-labs/cldr-runner-base:latest
     pull:
       policy: missing
 ```
@@ -80,7 +76,7 @@ Once defined, the EE can be used by Job Templates, Container Groups, etc.
 You can run the container directly in `docker` (or `podman`):
 
 ```bash
-docker run -it ghcr.io/cloudera-labs/cldr-runner-aws:latest /bin/bash
+docker run -it ghcr.io/cloudera-labs/cldr-runner-base:latest /bin/bash
 ```
 
 Take care to assemble and mount the needed directories other supporting assets; the image is based on [`ansible-runner`](https://ansible.readthedocs.io/projects/runner/en/stable/) (as are all Execution Environments) and runs as such.
@@ -90,19 +86,26 @@ Take care to assemble and mount the needed directories other supporting assets; 
 If you need to construct a local image, first set up a Python virtual environment with the latest `ansible-core` and `ansible-builder`:
 
 ```bash
-python -m venv ~/location/of/venv; source ~/location/of/venv/bin/activate; pip install ansible-builder
+hatch run build
 ```
 
-> [!NOTE]
-> If you have already set up `ansible-navigator`, then you have `ansible-builder`!
-
-Then change into the directory of the `cldr-runner` variation you need to build and run:
+Which is the equivalent of the following:
 
 ```bash
-ansible-builder build --prune-images --squash all --build-arg BUILD_VER=<your version> --build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") --tag <your tag>
+podman manifest rm ghcr.io/cloudera-labs/cldr-runner-base:$(hatch version)
+pushd base;
+ansible-builder build \
+-t localhost/cldr-runner-base:$(hatch version) \
+--extra-build-cli-args "--load --platform linux/amd64,linux/arm64 --manifest ghcr.io/cloudera-labs/cldr-runner-base:$(hatch version)" \
+--no-cache \
+--squash all;
+popd;
 ```
 
-You may want to update the variation's `execution-environment.yml` configuration file to use a different base image, say a local image, or build the `base` image before constructing CSP or `full` image. You can make this change in the following section of the configuration file:
+> [!WARNING]
+> The `--manifest` flag _appends_ images to the manifest, so take care if running this command multiple times! You may want to purge the local manifest using `podman manifest remove` or `podman manifest rm`.
+
+You may want to update the variation's `execution-environment.yml` configuration file to use a different base image, say a local image. You can make this change in the following section of the configuration file:
 
 ```yaml
 images:
@@ -123,7 +126,7 @@ version: 3
 
 images:
   base_image:
-    name: ghcr.io/cloudera-labs/cldr-runner-aws:latest
+    name: ghcr.io/cloudera-labs/cldr-runner-base:latest
 
 dependencies:
   galaxy:
