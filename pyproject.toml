@@ -22,29 +22,14 @@ python = "3.12"
 detached = true
 dependencies = [
   "pre-commit",
+  "unidecode",
   "coverage[toml]",
   "ansible-core<2.17", # For RHEL 8 support
   "ansible-builder",
 ]
 
-[tool.hatch.envs.lint]
-python = "3.12"
-detached = true
-extra-dependencies = [
-  "ansible-lint",
-]
-
-[tool.hatch.envs.lint.scripts]
-run = "pre-commit run -a"
-
-[build-system]
-requires = [
-  "hatchling",
-  "hatch-semver",
-]
-build-backend = "hatchling.build"
-
 [tool.hatch.envs.default.scripts]
+lint = "pre-commit run -a"
 build = [
   """
 podman manifest rm ghcr.io/cloudera-labs/cldr-runner-base:$(hatch version)
@@ -58,3 +43,17 @@ popd;
 echo "Image Manifest: ghcr.io/cloudera-labs/cldr-runner-base:$(hatch version)"
   """
 ]
+
+[tool.hatch.envs.lint]
+python = "3.12"
+detached = true
+extra-dependencies = [
+  "ansible-lint",
+]
+
+[build-system]
+requires = [
+  "hatchling",
+  "hatch-semver",
+]
+build-backend = "hatchling.build"
