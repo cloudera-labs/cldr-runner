@@ -24,9 +24,9 @@ images:
 
 dependencies:
   ansible_core:
-    package_pip: ansible-core~=2.12.10
+    package_pip: ansible-core~=2.15.0 # Limited by default py39 on CentOS 9
   ansible_runner:
-    package_pip: ansible-runner~=2.1.4
+    package_pip: ansible-runner~=2.4.0
   galaxy: requirements.yml
   python: requirements.txt
   system: bindep.txt
@@ -39,7 +39,7 @@ additional_build_files:
 
 additional_build_steps:
   prepend_base:
-    - RUN yum install -y git
+    - RUN dnf install -y epel-release epel-next-release git
     - RUN dnf clean all -y && rm -rf /var/cache/yum /var/cache/dnf /tmp/src
   prepend_builder:
     - RUN yum install -y yum-utils && yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
@@ -47,10 +47,12 @@ additional_build_steps:
     - ARG BUILD_VER="latest"
     - ARG BUILD_DATE="unknown"
     - ARG BUILD_REVISION="unknown"
+    - ARG CM_VERSION="7.13.1"
     - ENV BUILD_VER="${BUILD_VER}"
     - ENV BUILD_DATE="${BUILD_DATE}"
     - ENV BUILD_REVISION="${BUILD_REVISION}"
     - ENV PKGMGR_OPTS="--nodocs --setopt install_weak_deps=0"
+    - ENV CM_VERION="${CM_VERSION}"
     - LABEL org.opencontainers.image.authors="Cloudera Labs <cloudera-labs@cloudera.com>"
       org.opencontainers.image.vendor="Cloudera, Inc."
       org.opencontainers.image.url="https://github.com/cloudera-labs/cldr-runner/blob/main/README.md"
@@ -67,5 +69,11 @@ additional_build_steps:
     - RUN dnf clean all -y && rm -rf /var/cache/yum /var/cache/dnf /tmp/src
   append_final:
     - ADD _build/assets/bashrc /runner/.bashrc
+    # CM API client installation
+    - RUN curl -L "https://archive.cloudera.com/cm7/${CM_VERSION}/generic/jar/cm_api/cloudera-manager-api-swagger-${CM_VERSION}.tar" -o cloudera-manager-api.tar
+    - RUN tar xf cloudera-manager-api.tar
+    - RUN $PYCMD -m pip install swagger/python
+    - RUN $PYCMD -m pip install --upgrade paramiko pip
+    # Cleanup
     - RUN /usr/bin/python3 -m pip cache purge || echo "No Pip cache to purge"
     - RUN dnf clean all -y && rm -rf /var/cache/yum /var/cache/dnf /tmp/src
