@@ -43,3 +43,18 @@ requires = [
   "hatch-semver",
 ]
 build-backend = "hatchling.build"
+
+[tool.hatch.envs.default.scripts]
+build = [
+  """
+podman manifest rm ghcr.io/cloudera-labs/cldr-runner-base:$(hatch version)
+pushd base;
+ansible-builder build \
+-t localhost/cldr-runner-base:$(hatch version) \
+--extra-build-cli-args "--load --platform linux/amd64,linux/arm64 --manifest ghcr.io/cloudera-labs/cldr-runner-base:$(hatch version)" \
+--no-cache \
+--squash all;
+popd;
+echo "Image Manifest: ghcr.io/cloudera-labs/cldr-runner-base:$(hatch version)"
+  """
+]
