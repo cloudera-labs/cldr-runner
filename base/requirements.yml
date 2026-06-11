@@ -1,6 +1,6 @@
 ---
 
-# Copyright 2024 Cloudera, Inc. All Rights Reserved.
+# Copyright 2026 Cloudera, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,6 +20,6 @@ collections:
   - name: cloudera.cluster
     version: 5.0.0
   - name: cloudera.cloud
-    version: 3.1.0
+    version: 3.3.0
   - name: cloudera.exe
-    version: 3.2.0
+    version: 3.3.0
