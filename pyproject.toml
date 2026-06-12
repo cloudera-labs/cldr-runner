@@ -43,6 +43,22 @@ popd;
 echo "Image Manifest: ghcr.io/cloudera-labs/cldr-runner-base:$(hatch version)"
   """
 ]
+build-local = [
+  """
+pushd base;
+ansible-builder create;
+docker build \
+  --no-cache \
+  --progress=plain \
+  --build-arg BUILD_VER=$(hatch version) \
+  --build-arg BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
+  --build-arg BUILD_REVISION=$(git rev-parse HEAD) \
+  -t localhost/cldr-runner-base:$(hatch version) \
+  context/ 2>&1 | tee build.log;
+popd;
+echo "Local image: localhost/cldr-runner-base:$(hatch version)"
+  """
+]
 
 [tool.hatch.envs.lint]
 python = "3.12"
