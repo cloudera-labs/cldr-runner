@@ -30,19 +30,6 @@ dependencies = [
 
 [tool.hatch.envs.default.scripts]
 lint = "pre-commit run -a"
-build = [
-  """
-podman manifest rm ghcr.io/cloudera-labs/cldr-runner-base:$(hatch version)
-cd base;
-ansible-builder build \
--t localhost/cldr-runner-base:$(hatch version) \
---extra-build-cli-args "--load --platform linux/amd64,linux/arm64 --manifest ghcr.io/cloudera-labs/cldr-runner-base:$(hatch version)" \
---no-cache \
---squash all;
-cd ..;
-echo "Image Manifest: ghcr.io/cloudera-labs/cldr-runner-base:$(hatch version)"
-  """
-]
 build-local = [
   """
 cd base;
@@ -53,10 +40,38 @@ docker build \
   --build-arg BUILD_VER=$(hatch version) \
   --build-arg BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
   --build-arg BUILD_REVISION=$(git rev-parse HEAD) \
-  -t localhost/cldr-runner-base:$(hatch version) \
+  -t localhost/cldr-runner:$(hatch version) \
   context/ 2>&1 | tee build.log;
 cd ..;
-echo "Local image: localhost/cldr-runner-base:$(hatch version)"
+echo "Local image: localhost/cldr-runner:$(hatch version)"
+  """
+]
+build-publish = [
+  """
+cd base;
+ansible-builder create;
+_ARCH=${ARCH:-$(uname -m | sed 's/aarch64/arm64/;s/x86_64/amd64/')};
+docker buildx build \
+  --no-cache \
+  --platform linux/${_ARCH} \
+  --push \
+  --build-arg BUILD_VER=$(hatch version) \
+  --build-arg BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
+  --build-arg BUILD_REVISION=$(git rev-parse HEAD) \
+  -t ghcr.io/cloudera-labs/cldr-runner:$(hatch version)-${_ARCH} \
+  context/;
+cd ..;
+echo "Published: ghcr.io/cloudera-labs/cldr-runner:$(hatch version)-${_ARCH}"
+  """
+]
+build-manifest = [
+  """
+docker buildx imagetools create \
+  -t ghcr.io/cloudera-labs/cldr-runner:$(hatch version) \
+  -t ghcr.io/cloudera-labs/cldr-runner:latest \
+  ghcr.io/cloudera-labs/cldr-runner:$(hatch version)-amd64 \
+  ghcr.io/cloudera-labs/cldr-runner:$(hatch version)-arm64;
+echo "Manifest: ghcr.io/cloudera-labs/cldr-runner:$(hatch version)"
   """
 ]
 
