@@ -27,15 +27,15 @@ options:
 
 dependencies:
   ansible_core:
-    package_pip: ansible-core~=2.17.0
+    package_pip: ansible-core<2.17.0
   ansible_runner:
     package_pip: ansible-runner~=2.4.0
   galaxy: requirements.yml
   python: requirements.txt
   system: bindep.txt
   python_interpreter:
-    package_system: python3.11
-    python_path: /usr/bin/python3.11
+    package_system: python3.12
+    python_path: /usr/bin/python3.12
 
 additional_build_files:
   - src: bashrc
@@ -43,6 +43,8 @@ additional_build_files:
 
 additional_build_steps:
   prepend_base:
+    - ENV PIP_ROOT_USER_ACTION=ignore
+    - ENV PKGMGR_OPTS="--nodocs --setopt install_weak_deps=0"
     - >-
       RUN $PKGMGR install -y git-core
       && $PKGMGR clean all -y
@@ -54,13 +56,12 @@ additional_build_steps:
     - ARG BUILD_DATE="unknown"
     - ARG BUILD_REVISION="unknown"
     - ARG CM_VERSION="7.13.2"
-    # - ARG TF_VERSION="1.15.6"
     - ENV BUILD_VER="${BUILD_VER}"
     - ENV BUILD_DATE="${BUILD_DATE}"
     - ENV BUILD_REVISION="${BUILD_REVISION}"
-    - ENV PKGMGR_OPTS="--nodocs --setopt install_weak_deps=0"
     - ENV CM_VERSION="${CM_VERSION}"
-    # - ENV TF_VERSION="${TF_VERSION}"
+    - ENV PIP_ROOT_USER_ACTION=ignore
+    - ENV PKGMGR_OPTS="--nodocs --setopt install_weak_deps=0"
     - LABEL org.opencontainers.image.authors="Cloudera Labs <cloudera-labs@cloudera.com>"
       org.opencontainers.image.vendor="Cloudera, Inc."
       org.opencontainers.image.url="https://github.com/cloudera-labs/cldr-runner/blob/main/README.md"
@@ -77,15 +78,8 @@ additional_build_steps:
       org.label-schema.build-date="${BUILD_DATE}"
       io.buildah.version=""
   append_final:
-    # Set up a nice Bash environment
+    # Bash environment configuration
     - ADD _build/assets/bashrc /runner/.bashrc
-    # Install Terraform directly
-    # - >-
-    #   RUN curl -L "https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_linux_$(uname -m | sed 's/aarch64/arm64/;s/x86_64/amd64/').zip" -o /tmp/terraform.zip
-    #   && $PYCMD -c "import zipfile; zipfile.ZipFile('/tmp/terraform.zip').extract('terraform', '/tmp/')"
-    #   && mv /tmp/terraform /usr/local/bin/terraform
-    #   && chmod +x /usr/local/bin/terraform
-    #   && rm /tmp/terraform.zip
     # CM API client installation
     - >-
       RUN curl -L "https://archive.cloudera.com/cm7/${CM_VERSION}/generic/jar/cm_api/cloudera-manager-api-swagger-${CM_VERSION}.tar" -o /tmp/cloudera-manager-api.tar

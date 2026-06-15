@@ -21,5 +21,3 @@ collections:
     version: 5.0.0
   - name: cloudera.cloud
     version: 3.3.0
-  # - name: cloudera.exe
-  #   version: 3.3.0
