@@ -14,4 +14,4 @@
 
 # System dependencies for base cldr-runner
 
-terraform
+# terraform # Replaced by direct install in append_final

@@ -33,14 +33,30 @@ lint = "pre-commit run -a"
 build = [
   """
 podman manifest rm ghcr.io/cloudera-labs/cldr-runner-base:$(hatch version)
-pushd base;
+cd base;
 ansible-builder build \
 -t localhost/cldr-runner-base:$(hatch version) \
 --extra-build-cli-args "--load --platform linux/amd64,linux/arm64 --manifest ghcr.io/cloudera-labs/cldr-runner-base:$(hatch version)" \
 --no-cache \
 --squash all;
-popd;
+cd ..;
 echo "Image Manifest: ghcr.io/cloudera-labs/cldr-runner-base:$(hatch version)"
+  """
+]
+build-local = [
+  """
+cd base;
+ansible-builder create;
+docker build \
+  --no-cache \
+  --progress=plain \
+  --build-arg BUILD_VER=$(hatch version) \
+  --build-arg BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
+  --build-arg BUILD_REVISION=$(git rev-parse HEAD) \
+  -t localhost/cldr-runner-base:$(hatch version) \
+  context/ 2>&1 | tee build.log;
+cd ..;
+echo "Local image: localhost/cldr-runner-base:$(hatch version)"
   """
 ]
 
