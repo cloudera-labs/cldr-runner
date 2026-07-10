@@ -19,12 +19,20 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Production Image Version (e.g., 1.2.3)'
+        required: true
+        type: string
 
 permissions:
   contents: read
   packages: write
 
 jobs:
+  # ------------------------------------------------------------
+  # Parallel Single-Architecture Compilation
+  # ------------------------------------------------------------
   build-arch:
     name: Build and push (${{ matrix.arch }})
     runs-on: ${{ matrix.runs-on }}
@@ -56,14 +64,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
       - name: Build and push (${{ matrix.arch }})
         env:
           ARCH: ${{ matrix.arch }}
+          # Release tag supersedes hatch version.
+          IMAGE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
         run: hatch run build-publish
 
+  # ------------------------------------------------------------
+  # Multi-Arch Manifest Verification (GitHub Only)
+  # ------------------------------------------------------------
   merge-manifest:
     name: Create and push multi-arch manifest
     runs-on: ubuntu-latest
@@ -92,4 +102,7 @@ jobs:
         uses: docker/setup-buildx-action@v4
 
       - name: Create and push manifest
+        env:
+          # Release tag supersedes hatch version.
+          IMAGE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
         run: hatch run build-manifest
