@@ -32,46 +32,97 @@ dependencies = [
 lint = "pre-commit run -a"
 build-local = [
   """
-cd base;
-ansible-builder create;
-docker build \
+set -e
+if command -v docker >/dev/null 2>&1; then
+  ENGINE=docker
+elif command -v podman >/dev/null 2>&1; then
+  ENGINE=podman
+else
+  echo "No container engine found: install docker or podman" >&2
+  exit 1
+fi
+_TAG=$(hatch version)
+ansible-builder build -vvv \
+  --container-runtime "$ENGINE" \
   --no-cache \
-  --progress=plain \
-  --build-arg BUILD_VER=$(hatch version) \
+  -c base/context \
+  -f base/execution-environment.yml \
+  --build-arg BUILD_VER=$_TAG \
   --build-arg BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
   --build-arg BUILD_REVISION=$(git rev-parse HEAD) \
-  -t localhost/cldr-runner:$(hatch version) \
-  context/ 2>&1 | tee build.log;
-cd ..;
-echo "Local image: localhost/cldr-runner:$(hatch version)"
+  -t localhost/cldr-runner:$_TAG 2>&1 | tee base/build.log
+echo "Local image ($ENGINE): localhost/cldr-runner:$_TAG"
   """
 ]
 build-publish = [
   """
-cd base;
-ansible-builder create;
-_ARCH=${ARCH:-$(uname -m | sed 's/aarch64/arm64/;s/x86_64/amd64/')};
-docker buildx build \
+set -e
+if command -v docker >/dev/null 2>&1; then
+  ENGINE=docker
+elif command -v podman >/dev/null 2>&1; then
+  ENGINE=podman
+else
+  echo "No container engine found: install docker or podman" >&2
+  exit 1
+fi
+_ARCH=$ARCH
+if [ -z "$_ARCH" ]; then
+  _ARCH=$(uname -m | sed 's/aarch64/arm64/;s/x86_64/amd64/')
+fi
+_RAW_TAG=$IMAGE_TAG
+if [ -z "$_RAW_TAG" ]; then
+  _RAW_TAG=$(hatch version)
+fi
+_IMAGE_TAG=$(echo "$_RAW_TAG" | sed 's/^v//')
+_IMAGE=ghcr.io/cloudera-labs/cldr-runner:$_IMAGE_TAG-$_ARCH
+ansible-builder build \
+  --container-runtime "$ENGINE" \
   --no-cache \
-  --platform linux/${_ARCH} \
-  --push \
-  --build-arg BUILD_VER=$(hatch version) \
+  -c base/context \
+  -f base/execution-environment.yml \
+  --build-arg BUILD_VER=$_IMAGE_TAG \
   --build-arg BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ) \
   --build-arg BUILD_REVISION=$(git rev-parse HEAD) \
-  -t ghcr.io/cloudera-labs/cldr-runner:$(hatch version)-${_ARCH} \
-  context/;
-cd ..;
-echo "Published: ghcr.io/cloudera-labs/cldr-runner:$(hatch version)-${_ARCH}"
+  -t $_IMAGE
+"$ENGINE" push $_IMAGE
+echo "Published ($ENGINE): $_IMAGE"
   """
 ]
 build-manifest = [
   """
-docker buildx imagetools create \
-  -t ghcr.io/cloudera-labs/cldr-runner:$(hatch version) \
-  -t ghcr.io/cloudera-labs/cldr-runner:latest \
-  ghcr.io/cloudera-labs/cldr-runner:$(hatch version)-amd64 \
-  ghcr.io/cloudera-labs/cldr-runner:$(hatch version)-arm64;
-echo "Manifest: ghcr.io/cloudera-labs/cldr-runner:$(hatch version)"
+set -e
+if command -v docker >/dev/null 2>&1; then
+  ENGINE=docker
+elif command -v podman >/dev/null 2>&1; then
+  ENGINE=podman
+else
+  echo "No container engine found: install docker or podman" >&2
+  exit 1
+fi
+_RAW_TAG=$IMAGE_TAG
+if [ -z "$_RAW_TAG" ]; then
+  _RAW_TAG=$(hatch version)
+fi
+_IMAGE_TAG=$(echo "$_RAW_TAG" | sed 's/^v//')
+_REPO=ghcr.io/cloudera-labs/cldr-runner
+if [ "$ENGINE" = docker ]; then
+  docker buildx imagetools create \
+    -t $_REPO:$_IMAGE_TAG \
+    -t $_REPO:latest \
+    $_REPO:$_IMAGE_TAG-amd64 \
+    $_REPO:$_IMAGE_TAG-arm64
+else
+  for _t in $_IMAGE_TAG latest; do
+    if podman manifest exists $_REPO:$_t; then
+      podman manifest rm $_REPO:$_t
+    fi
+    podman manifest create $_REPO:$_t
+    podman manifest add $_REPO:$_t docker://$_REPO:$_IMAGE_TAG-amd64
+    podman manifest add $_REPO:$_t docker://$_REPO:$_IMAGE_TAG-arm64
+    podman manifest push --all $_REPO:$_t docker://$_REPO:$_t
+  done
+fi
+echo "Manifest ($ENGINE): $_REPO:$_IMAGE_TAG"
   """
 ]
 
