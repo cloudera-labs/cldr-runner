@@ -101,7 +101,7 @@ pip install "ansible-core<2.17" ansible-navigator
 
 echo -e "\n===== Provision the project and its requirements =====\n"
 if [ $# -eq 0 ]; then
-    echo "Initializing default cldr-runner/base"
+    echo "Initializing default cldr-runner"
     clone_repo "https://github.com/cloudera-labs/cldr-runner.git" "" "$DEST_DIR" "${WORKSPACE_GROUP}"
     pushd "$DEST_DIR/base"
 else
