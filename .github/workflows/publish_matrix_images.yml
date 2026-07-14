@@ -17,8 +17,7 @@
 name: Publish all Execution Environment images
 
 on:
-  release:
-    types: [published]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -30,13 +29,3 @@ jobs:
     uses: ./.github/workflows/build_push_image.yml
     with:
       PROFILE: base
-
-  publish-profiles:
-    needs: publish-base
-    uses: ./.github/workflows/build_push_image.yml
-    strategy:
-      fail-fast: false
-      matrix:
-        ee_profile: ["aws", "azure", "gcp", "full"]
-    with:
-      PROFILE: ${{ matrix.ee_profile }}

@@ -1,6 +1,6 @@
 ---
 
-# Copyright 2023 Cloudera, Inc. All Rights Reserved.
+# Copyright 2026 Cloudera, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,18 +20,22 @@ version: 3
 
 images:
   base_image:
-    name: quay.io/centos/centos:stream9
+    name: registry.access.redhat.com/ubi9/ubi-minimal:9.8
+
+options:
+  package_manager_path: /usr/bin/microdnf
 
 dependencies:
   ansible_core:
-    package_pip: ansible-core~=2.12.10
+    package_pip: ansible-core<2.17.0
   ansible_runner:
-    package_pip: ansible-runner~=2.1.4
+    package_pip: ansible-runner~=2.4.0
   galaxy: requirements.yml
   python: requirements.txt
   system: bindep.txt
   python_interpreter:
-    package_system: "python39"
+    package_system: python3.12
+    python_path: /usr/bin/python3.12
 
 additional_build_files:
   - src: bashrc
@@ -39,17 +43,24 @@ additional_build_files:
 
 additional_build_steps:
   prepend_base:
-    - RUN yum install -y git
-    - RUN dnf clean all -y && rm -rf /var/cache/yum /var/cache/dnf /tmp/src
-  prepend_builder:
-    - RUN yum install -y yum-utils && yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+    - ENV PIP_ROOT_USER_ACTION=ignore
+    - ENV PKGMGR_OPTS="--nodocs --setopt install_weak_deps=0"
+    - >-
+      RUN $PKGMGR install -y git-core
+      && $PKGMGR clean all -y
+      && rm -rf /var/cache/yum /var/cache/dnf /tmp/src
+  append_base:
+    - RUN $PYCMD -m pip install --upgrade pip
   prepend_final:
     - ARG BUILD_VER="latest"
     - ARG BUILD_DATE="unknown"
     - ARG BUILD_REVISION="unknown"
+    - ARG CM_VERSION="7.13.2"
     - ENV BUILD_VER="${BUILD_VER}"
     - ENV BUILD_DATE="${BUILD_DATE}"
     - ENV BUILD_REVISION="${BUILD_REVISION}"
+    - ENV CM_VERSION="${CM_VERSION}"
+    - ENV PIP_ROOT_USER_ACTION=ignore
     - ENV PKGMGR_OPTS="--nodocs --setopt install_weak_deps=0"
     - LABEL org.opencontainers.image.authors="Cloudera Labs <cloudera-labs@cloudera.com>"
       org.opencontainers.image.vendor="Cloudera, Inc."
@@ -57,15 +68,27 @@ additional_build_steps:
       org.opencontainers.image.source="https://github.com/cloudera-labs/cldr-runner.git"
       org.opencontainers.image.licenses=Apache-2.0
       org.opencontainers.image.title="cldr-runner-base"
-      org.opencontainers.image.description="Ansible Execution Environment with collections and dependencies for CDP Public Cloud, Private Cloud, and Data Services."
+      org.opencontainers.image.description="Ansible Execution Environment for Cloudera Public Cloud, Private Cloud, and Data Services."
       org.opencontainers.image.created="${BUILD_DATE}"
       org.opencontainers.image.version="${BUILD_VER}"
       org.opencontainers.image.revision="${BUILD_REVISION}"
-    - RUN /usr/bin/python3 -m pip install --upgrade pip
-    - RUN yum install -y yum-utils && yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
-    - RUN /usr/bin/python3 -m pip cache purge || echo "No Pip cache to purge"
-    - RUN dnf clean all -y && rm -rf /var/cache/yum /var/cache/dnf /tmp/src
+      org.label-schema.name="cldr-runner-base"
+      org.label-schema.vendor="Cloudera, Inc."
+      org.label-schema.license="Apache-2.0"
+      org.label-schema.build-date="${BUILD_DATE}"
+      io.buildah.version=""
   append_final:
+    # Bash environment configuration
     - ADD _build/assets/bashrc /runner/.bashrc
-    - RUN /usr/bin/python3 -m pip cache purge || echo "No Pip cache to purge"
-    - RUN dnf clean all -y && rm -rf /var/cache/yum /var/cache/dnf /tmp/src
+    # CM API client installation
+    - >-
+      RUN curl -L "https://archive.cloudera.com/cm7/${CM_VERSION}/generic/jar/cm_api/cloudera-manager-api-swagger-${CM_VERSION}.tar" -o /tmp/cloudera-manager-api.tar
+      && $PYCMD -c "import tarfile; tarfile.open('/tmp/cloudera-manager-api.tar').extractall('/tmp/')"
+      && $PYCMD -m pip install /tmp/swagger/python
+      && $PYCMD -m pip install --upgrade paramiko
+      && rm -rf /tmp/swagger /tmp/cloudera-manager-api.tar
+    # Cleanup
+    - >-
+      RUN $PYCMD -m pip cache purge || echo "No Pip cache to purge"
+      && $PKGMGR clean all -y
+      && rm -rf /var/cache/yum /var/cache/dnf /tmp/src

@@ -1,6 +1,6 @@
 ---
 
-# Copyright 2024 Cloudera, Inc. All Rights Reserved.
+# Copyright 2026 Cloudera, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,23 +17,7 @@
 # Galaxy requirements for base cldr-runner
 
 collections:
-  - name: cloudera.cloud
-    version: 2.5.1
   - name: cloudera.cluster
-    version: 4.4.0
-  - name: cloudera.exe
-    version: 2.4.1
-  - name: community.mysql
-    version: 3.1.0
-  - name: community.postgresql
-    version: 1.6.1
-  - name: freeipa.ansible_freeipa
-    version: 1.11.1
-  - name: cloud.terraform
-    version: 2.0.0
-
-roles:
-  - name: geerlingguy.postgresql
-    version: 2.2.0
-  - src: https://github.com/dbeech/ansible-role-mysql
-    version: master
+    version: 5.0.0
+  - name: cloudera.cloud
+    version: 3.3.0

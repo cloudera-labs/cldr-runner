@@ -80,6 +80,11 @@ jobs:
         run: |
           ansible-builder create --file ${{ inputs.PROFILE }}/execution-environment.yml
 
+      - name: Set up QEMU for multi-arch builds
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
+
       - name: Build image from builder context
         uses: redhat-actions/buildah-build@v2
         with:
@@ -90,6 +95,7 @@ jobs:
             BUILD_VER=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
             BUILD_DATE=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
             BUILD_REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
+          platforms: linux/amd64, linux/arm64 # multi-arch build
           image: ${{ github.repository }}
           tags: ${{ steps.meta.outputs.tags }}
 
