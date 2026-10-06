@@ -1,6 +1,7 @@
 # cldr-runner - Ansible Execution Environments for Cloudera Data Platform (CDP)
 
 [![Execution Environment images](https://github.com/cloudera-labs/cldr-runner/actions/workflows/publish.yml/badge.svg)](https://github.com/cloudera-labs/cldr-runner/actions/workflows/publish.yml)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcloudera-labs%2Fcldr-runner.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcloudera-labs%2Fcldr-runner?ref=badge_shield)
 
 `cldr-runner` is a Ansible [Execution Environment](https://ansible.readthedocs.io/projects/builder/en/stable/#execution-environments) for running Cloudera playbooks, examples, and general automation for [**Cloudera Data Platform (CDP) Public Cloud, Private Cloud, and Data Services**](https://www.cloudera.com/products/cloudera-data-platform.html). The images are appropriate for use with [`ansible-navigator`](https://ansible.readthedocs.io/projects/navigator/) and [AWX](https://github.com/ansible/awx)/[Red Hat Ansible Automation Platform (AAP)](https://www.redhat.com/en/technologies/management/ansible).
 
@@ -190,3 +191,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcloudera-labs%2Fcldr-runner.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcloudera-labs%2Fcldr-runner?ref=badge_large)
