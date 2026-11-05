@@ -10,10 +10,11 @@ Specifically, the project consists of `execution-environment.yml` configuration 
 `cldr-runner` contains:
 - [`cloudera.cloud`](https://github.com/cloudera-labs/cloudera.cloud)
 - [`cloudera.cluster`](https://github.com/cloudera-labs/cloudera.cluster)
+- [`cloudera.services`](https://github.com/cloudera-labs/cloudera.services)
 - [`cdpcurl`](https://github.com/cloudera/cdpcurl)
 - `git`
 
-Each release is published for `amd64` and `arm64` architctures. Each image is tagged `cloudera-labs/cldr-runner:<version>-<arch>`, and there is a `latest` manifest.
+Each release is published for `amd64` and `arm64` architectures. Each image is tagged `cloudera-labs/cldr-runner:<version>-<arch>`, and there is a `latest` manifest.
 
 # Quickstart
 
